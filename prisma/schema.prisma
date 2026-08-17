@@ -1,0 +1,470 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  passwordHash  String?
+  role          String    @default("USER") // USER | ADMIN
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts         Account[]
+  sessions         Session[]
+  profile          Profile?
+  wallet           Wallet?
+  dailyRewardState DailyRewardState?
+  storyProgress    UserStoryProgress[]
+  episodeProgress  UserEpisodeProgress[]
+  choices          UserChoice[]
+  relationships    UserRelationship[]
+  storyStats       UserStoryStat[]
+  episodeUnlocks   EpisodeUnlock[]
+  achievements     UserAchievement[]
+  analyticsEvents  AnalyticsEvent[]
+
+  @@index([role])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Profile {
+  id           String    @id @default(cuid())
+  userId       String    @unique
+  displayName  String
+  bio          String?
+  avatarUrl    String?
+  level        Int       @default(1)
+  exp          Int       @default(0)
+  streak       Int       @default(0)
+  lastActiveAt DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Story {
+  id               String    @id @default(cuid())
+  title            String
+  slug             String    @unique
+  shortDescription String
+  description      String
+  coverImage       String
+  bannerImage      String?
+  author           String    @default("PLOT Studio")
+  ageRating        String    @default("16+") // ALL | 13+ | 16+ | 18+
+  status           String    @default("PUBLISHED") // DRAFT | PUBLISHED | COMPLETED | ARCHIVED
+  featured         Boolean   @default(false)
+  viewCount        Int       @default(0)
+  startCount       Int       @default(0)
+  completionCount  Int       @default(0)
+  publishedAt      DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  genres          StoryGenre[]
+  tags            StoryTag[]
+  characters      Character[]
+  statDefinitions StoryStatDefinition[]
+  episodes        Episode[]
+  endings         Ending[]
+  userProgress    UserStoryProgress[]
+  userChoices     UserChoice[]
+  userRelationships UserRelationship[]
+  userStoryStats  UserStoryStat[]
+
+  @@index([status])
+  @@index([featured])
+  @@index([slug])
+}
+
+model Genre {
+  id        String       @id @default(cuid())
+  name      String       @unique
+  slug      String       @unique
+  icon      String?
+  stories   StoryGenre[]
+}
+
+model StoryGenre {
+  storyId String
+  genreId String
+  story   Story @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  genre   Genre @relation(fields: [genreId], references: [id], onDelete: Cascade)
+
+  @@id([storyId, genreId])
+  @@index([storyId])
+  @@index([genreId])
+}
+
+model StoryTag {
+  id      String @id @default(cuid())
+  storyId String
+  tag     String
+  story   Story  @relation(fields: [storyId], references: [id], onDelete: Cascade)
+
+  @@index([storyId])
+  @@index([tag])
+}
+
+model Character {
+  id                  String           @id @default(cuid())
+  storyId             String
+  name                String
+  slug                String
+  role                String           @default("SUPPORTING") // PROTAGONIST | MAIN_LOVE_INTEREST | LOVE_INTEREST | ANTAGONIST | SUPPORTING
+  biography           String?
+  avatarUrl           String?
+  relationshipEnabled Boolean          @default(true)
+  defaultLove         Int              @default(0)
+  defaultTrust        Int              @default(0)
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+
+  story         Story            @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  assets        CharacterAsset[]
+  relationships UserRelationship[]
+
+  @@index([storyId])
+  @@index([slug])
+}
+
+model CharacterAsset {
+  id          String    @id @default(cuid())
+  characterId String
+  expression  String    // normal | happy | sad | angry | shocked | embarrassed | smirk | crying | determined
+  imageUrl    String
+
+  character Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+
+  @@unique([characterId, expression])
+  @@index([characterId])
+}
+
+model StoryStatDefinition {
+  id           String @id @default(cuid())
+  storyId      String
+  key          String // e.g. REPUTATION, REVENGE
+  label        String
+  description  String?
+  defaultValue Int    @default(50)
+  minVal       Int    @default(0)
+  maxVal       Int    @default(100)
+  icon         String?
+
+  story Story @relation(fields: [storyId], references: [id], onDelete: Cascade)
+
+  @@unique([storyId, key])
+  @@index([storyId])
+}
+
+model Episode {
+  id           String    @id @default(cuid())
+  storyId      String
+  number       Int
+  title        String
+  synopsis     String?
+  status       String    @default("PUBLISHED") // DRAFT | PUBLISHED | ARCHIVED
+  unlockType   String    @default("FREE") // FREE | COIN_LOCKED | PREMIUM
+  coinPrice    Int       @default(0)
+  diamondPrice Int       @default(0)
+  coverImage   String?
+  publishedAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  story          Story                 @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  nodes          StoryNode[]
+  userProgress   UserEpisodeProgress[]
+  episodeUnlocks EpisodeUnlock[]
+  userChoices    UserChoice[]
+
+  @@unique([storyId, number])
+  @@index([storyId])
+  @@index([status])
+}
+
+model StoryNode {
+  id         String   @id @default(cuid())
+  episodeId  String
+  nodeId     String   // e.g. "node_1", "choice_1", "scene_2" (unique within episode)
+  nodeIndex  Int
+  type       String   // DIALOGUE | NARRATION | CHOICE | STAT_CHANGE | RELATIONSHIP_CHANGE | SCENE_CHANGE | MUSIC_CHANGE | SFX | DELAY | JUMP | END_EPISODE | ENDING
+  configJson String   // Structured JSON validated by Zod
+  nextNodeId String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  episode Episode @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+
+  @@unique([episodeId, nodeId])
+  @@index([episodeId])
+  @@index([nodeIndex])
+}
+
+model Ending {
+  id            String  @id @default(cuid())
+  storyId       String
+  slug          String  // e.g. "true-love", "independent", "revenge", "secret"
+  title         String
+  description   String
+  badgeTitle    String
+  artworkUrl    String?
+  conditionJson String? // Structured conditions required to unlock
+  endingType    String  @default("TRUE_LOVE") // TRUE_LOVE | INDEPENDENT | REVENGE | SECRET
+
+  story Story @relation(fields: [storyId], references: [id], onDelete: Cascade)
+
+  @@unique([storyId, slug])
+  @@index([storyId])
+}
+
+model UserStoryProgress {
+  id                   String    @id @default(cuid())
+  userId               String
+  storyId              String
+  currentEpisodeNumber Int       @default(1)
+  lastPlayedNodeId     String?
+  isCompleted          Boolean   @default(false)
+  unlockedEndings      String    @default("[]") // JSON string array of ending slugs
+  restartedAt          DateTime?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  story Story @relation(fields: [storyId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, storyId])
+  @@index([userId])
+  @@index([storyId])
+}
+
+model UserEpisodeProgress {
+  id          String    @id @default(cuid())
+  userId      String
+  episodeId   String
+  isCompleted Boolean   @default(false)
+  completedAt DateTime?
+  lastNodeId  String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  episode Episode @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, episodeId])
+  @@index([userId])
+  @@index([episodeId])
+}
+
+model UserChoice {
+  id               String   @id @default(cuid())
+  userId           String
+  storyId          String
+  episodeId        String
+  nodeId           String
+  choiceOptionId   String
+  choiceOptionText String
+  createdAt        DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  story   Story   @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  episode Episode @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([storyId])
+  @@index([episodeId])
+  @@index([nodeId, choiceOptionId])
+}
+
+model UserRelationship {
+  id          String   @id @default(cuid())
+  userId      String
+  storyId     String
+  characterId String
+  loveValue   Int      @default(0)
+  trustValue  Int      @default(0)
+  updatedAt   DateTime @updatedAt
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  story     Story     @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  character Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, storyId, characterId])
+  @@index([userId])
+  @@index([storyId])
+  @@index([characterId])
+}
+
+model UserStoryStat {
+  id        String   @id @default(cuid())
+  userId    String
+  storyId   String
+  statKey   String
+  value     Int      @default(50)
+  updatedAt DateTime @updatedAt
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  story Story @relation(fields: [storyId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, storyId, statKey])
+  @@index([userId])
+  @@index([storyId])
+}
+
+model Wallet {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  coins     Int      @default(100)
+  diamonds  Int      @default(20)
+  updatedAt DateTime @updatedAt
+
+  user         User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions WalletTransaction[]
+}
+
+model WalletTransaction {
+  id           String   @id @default(cuid())
+  walletId     String
+  currency     String   // COINS | DIAMONDS
+  amount       Int      // Positive for credit, negative for debit
+  type         String   // SIGNUP_BONUS | DAILY_REWARD | EPISODE_UNLOCK | PREMIUM_CHOICE | ADMIN_GRANT | PURCHASE | REFUND | MISSION_REWARD
+  source       String?
+  referenceId  String?
+  balanceAfter Int
+  description  String?
+  createdAt    DateTime @default(now())
+
+  wallet Wallet @relation(fields: [walletId], references: [id], onDelete: Cascade)
+
+  @@index([walletId])
+  @@index([type])
+  @@index([createdAt])
+}
+
+model EpisodeUnlock {
+  id           String   @id @default(cuid())
+  userId       String
+  episodeId    String
+  coinSpent    Int      @default(0)
+  diamondSpent Int      @default(0)
+  unlockedAt   DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  episode Episode @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, episodeId])
+  @@index([userId])
+  @@index([episodeId])
+}
+
+model DailyRewardState {
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  streak          Int       @default(0)
+  lastClaimedAt   DateTime?
+  currentDayIndex Int       @default(1) // 1 to 7
+  totalClaimed    Int       @default(0)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Achievement {
+  id            String   @id @default(cuid())
+  code          String   @unique // FIRST_CHOICE | FIRST_EPISODE | FIRST_STORY_COMPLETE | HEARTBREAKER | HOPELESS_ROMANTIC | SECRET_ENDING | COMPLETIONIST
+  title         String
+  description   String
+  icon          String   @default("trophy")
+  coinReward    Int      @default(10)
+  diamondReward Int      @default(2)
+  category      String   @default("GENERAL") // GENERAL | STORY | RELATIONSHIP | SECRET
+  createdAt     DateTime @default(now())
+
+  userAchievements UserAchievement[]
+}
+
+model UserAchievement {
+  id            String   @id @default(cuid())
+  userId        String
+  achievementId String
+  unlockedAt    DateTime @default(now())
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievement Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, achievementId])
+  @@index([userId])
+  @@index([achievementId])
+}
+
+model Asset {
+  id        String   @id @default(cuid())
+  name      String
+  type      String   // COVER | BANNER | BACKGROUND | CHARACTER | AVATAR | AUDIO_MUSIC | AUDIO_SFX | ENDING_ART
+  url       String
+  sizeBytes Int      @default(0)
+  mimeType  String?
+  createdAt DateTime @default(now())
+
+  @@index([type])
+}
+
+model AnalyticsEvent {
+  id             String   @id @default(cuid())
+  userId         String?
+  eventName      String   // story_view | story_start | episode_start | episode_complete | choice_selected | etc.
+  propertiesJson String   @default("{}")
+  createdAt      DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([eventName])
+  @@index([createdAt])
+  @@index([userId])
+}
