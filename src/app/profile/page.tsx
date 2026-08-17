@@ -16,6 +16,8 @@ import {
 } from "lucide-react";
 import { LogoutButton } from "@/components/auth/LogoutButton";
 
+export const dynamic = "force-dynamic";
+
 export default async function ProfilePage() {
   const user = await getCurrentUser();
 

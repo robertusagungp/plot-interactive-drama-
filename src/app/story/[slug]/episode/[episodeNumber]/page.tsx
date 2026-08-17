@@ -5,6 +5,8 @@ import { db } from "@/lib/db";
 import { StoryPlayer } from "@/components/player/StoryPlayer";
 import type { Metadata } from "next";
 
+export const dynamic = "force-dynamic";
+
 export async function generateMetadata({
   params,
 }: {

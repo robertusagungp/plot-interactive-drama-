@@ -4,6 +4,8 @@ import { db } from "@/lib/db";
 import { Trophy, Award, Lock, Sparkles, CheckCircle2, Coins, Gem } from "lucide-react";
 import Link from "next/link";
 
+export const dynamic = "force-dynamic";
+
 export default async function AchievementsPage() {
   const user = await getCurrentUser();
 

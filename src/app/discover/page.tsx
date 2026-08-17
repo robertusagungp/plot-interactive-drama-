@@ -4,6 +4,8 @@ import { StoryCard } from "@/components/story/StoryCard";
 import Link from "next/link";
 import { Compass, Filter, Sparkles } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 export default async function DiscoverPage({
   searchParams,
 }: {

@@ -17,6 +17,8 @@ import {
   DollarSign,
 } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminDashboardPage() {
   try {
     await requireAdmin();

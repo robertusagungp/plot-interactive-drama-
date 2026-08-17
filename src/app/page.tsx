@@ -19,7 +19,7 @@ import {
   Crown,
 } from "lucide-react";
 
-export const revalidate = 60; // Cache 60s for high performance
+export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   const user = await getCurrentUser();

@@ -4,6 +4,8 @@ import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { AdminPaymentOrders } from "@/components/admin/AdminPaymentOrders";
 import { CreditCard, ShieldCheck } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminPaymentsPage() {
   try {
     await requireAdmin();

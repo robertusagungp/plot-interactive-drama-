@@ -7,6 +7,8 @@ import Link from "next/link";
 import { Play, Sparkles, Heart, Users, BookOpen, ArrowLeft } from "lucide-react";
 import type { Metadata } from "next";
 
+export const dynamic = "force-dynamic";
+
 export async function generateMetadata({
   params,
 }: {

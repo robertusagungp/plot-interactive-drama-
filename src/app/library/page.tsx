@@ -4,6 +4,8 @@ import { StoryCard } from "@/components/story/StoryCard";
 import Link from "next/link";
 import { BookOpen, Sparkles, Play, Clock, CheckCircle2 } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 export default async function LibraryPage() {
   const user = await getCurrentUser();
 
