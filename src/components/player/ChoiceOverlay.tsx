@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { Gem, Coins, Lock, Sparkles, CheckCircle2 } from "lucide-react";
 import { StoryChoiceOption } from "@/lib/types/story";
 import { evaluateAllConditions } from "@/lib/story-evaluator";
+import { useI18n } from "@/lib/i18n/context";
 
 interface ChoiceOverlayProps {
   prompt?: string;
@@ -20,7 +21,7 @@ interface ChoiceOverlayProps {
 }
 
 export const ChoiceOverlay: React.FC<ChoiceOverlayProps> = ({
-  prompt = "What is your decision?",
+  prompt,
   options,
   userCoins,
   userDiamonds,
@@ -31,8 +32,11 @@ export const ChoiceOverlay: React.FC<ChoiceOverlayProps> = ({
   onSelectOption,
   onOpenWallet,
 }) => {
+  const { t } = useI18n();
   const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null);
   const [showPercentages, setShowPercentages] = useState(false);
+
+  const effectivePrompt = prompt || t("makeYourChoice");
 
   const handleSelect = (option: StoryChoiceOption) => {
     // Check condition lock
@@ -74,7 +78,7 @@ export const ChoiceOverlay: React.FC<ChoiceOverlayProps> = ({
         <div className="flex items-center justify-center gap-2 mb-4 text-center">
           <Sparkles className="w-4 h-4 text-rose-400" />
           <h3 className="text-sm font-semibold tracking-wider uppercase text-zinc-300">
-            {prompt}
+            {effectivePrompt}
           </h3>
           <Sparkles className="w-4 h-4 text-rose-400" />
         </div>
@@ -176,7 +180,7 @@ export const ChoiceOverlay: React.FC<ChoiceOverlayProps> = ({
                 {/* Condition Lock Reason */}
                 {!meetsConditions && (
                   <p className="text-[11px] text-zinc-400 mt-1 pl-6">
-                    Requirement locked
+                    {t("locked")}
                   </p>
                 )}
               </motion.button>

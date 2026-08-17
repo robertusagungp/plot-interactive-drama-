@@ -15,12 +15,15 @@ import {
   ShieldAlert,
   Menu,
   X,
+  Globe,
 } from "lucide-react";
 import { DailyRewardModal } from "../wallet/DailyRewardModal";
 import { WalletModal } from "../wallet/WalletModal";
+import { useI18n, LanguageSwitcher } from "@/lib/i18n/context";
 
 export const Navbar: React.FC = () => {
   const pathname = usePathname();
+  const { t } = useI18n();
   const [userData, setUserData] = useState<any>(null);
   const [isRewardOpen, setIsRewardOpen] = useState(false);
   const [isWalletOpen, setIsWalletOpen] = useState(false);
@@ -77,7 +80,7 @@ export const Navbar: React.FC = () => {
                   pathname === "/" ? "text-rose-400 font-bold" : "text-zinc-400"
                 }`}
               >
-                Home
+                {t("navHome")}
               </Link>
               <Link
                 href="/discover"
@@ -85,7 +88,7 @@ export const Navbar: React.FC = () => {
                   pathname === "/discover" ? "text-rose-400 font-bold" : "text-zinc-400"
                 }`}
               >
-                Discover
+                {t("navDiscover")}
               </Link>
               <Link
                 href="/library"
@@ -93,7 +96,7 @@ export const Navbar: React.FC = () => {
                   pathname === "/library" ? "text-rose-400 font-bold" : "text-zinc-400"
                 }`}
               >
-                Library
+                {t("navLibrary")}
               </Link>
               <Link
                 href="/achievements"
@@ -101,7 +104,7 @@ export const Navbar: React.FC = () => {
                   pathname === "/achievements" ? "text-rose-400 font-bold" : "text-zinc-400"
                 }`}
               >
-                Achievements
+                {t("navAchievements")}
               </Link>
               {isAdmin && (
                 <Link
@@ -109,14 +112,17 @@ export const Navbar: React.FC = () => {
                   className="px-2.5 py-1 rounded-lg bg-purple-950/80 border border-purple-500/40 text-purple-300 hover:bg-purple-900 text-xs font-bold flex items-center gap-1 transition"
                 >
                   <ShieldAlert className="w-3.5 h-3.5" />
-                  Admin CMS
+                  {t("navAdmin")}
                 </Link>
               )}
             </nav>
           </div>
 
           {/* Right Utilities & Wallet Controls */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            {/* Language Switcher */}
+            <LanguageSwitcher />
+
             {/* Search shortcut */}
             <Link
               href="/search"
@@ -140,7 +146,7 @@ export const Navbar: React.FC = () => {
             {/* Currency Pill / Wallet Opener */}
             <button
               onClick={() => setIsWalletOpen(true)}
-              className="flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-zinc-900 hover:bg-zinc-850 border border-white/10 text-xs font-bold hover:border-white/20 transition shadow-inner"
+              className="flex items-center gap-2 px-2.5 sm:px-3 py-1.5 rounded-full bg-zinc-900 hover:bg-zinc-850 border border-white/10 text-xs font-bold hover:border-white/20 transition shadow-inner"
             >
               <div className="flex items-center gap-1 text-amber-400">
                 <Coins className="w-3.5 h-3.5" />
@@ -162,14 +168,14 @@ export const Navbar: React.FC = () => {
                 <div className="w-5 h-5 rounded-full bg-rose-600/40 border border-rose-500/50 flex items-center justify-center text-[10px] text-rose-200">
                   {userData.name?.[0] || "U"}
                 </div>
-                <span>{userData.profile?.displayName || userData.name || "Profile"}</span>
+                <span>{userData.profile?.displayName || userData.name || t("navProfile")}</span>
               </Link>
             ) : (
               <Link
                 href="/login"
                 className="px-3.5 py-1.5 rounded-full bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold transition shadow-md shadow-rose-950/40"
               >
-                Sign In
+                {t("navLogin")}
               </Link>
             )}
           </div>

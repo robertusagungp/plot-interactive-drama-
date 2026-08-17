@@ -31,6 +31,7 @@ model User {
   episodeUnlocks   EpisodeUnlock[]
   achievements     UserAchievement[]
   analyticsEvents  AnalyticsEvent[]
+  paymentOrders    PaymentOrder[]
 
   @@index([role])
 }
@@ -74,50 +75,54 @@ model VerificationToken {
 }
 
 model Profile {
-  id           String    @id @default(cuid())
-  userId       String    @unique
-  displayName  String
-  bio          String?
-  avatarUrl    String?
-  level        Int       @default(1)
-  exp          Int       @default(0)
-  streak       Int       @default(0)
-  lastActiveAt DateTime?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  displayName     String
+  bio             String?
+  avatarUrl       String?
+  preferredLocale String    @default("id") // "id" | "en"
+  level           Int       @default(1)
+  exp             Int       @default(0)
+  streak          Int       @default(0)
+  lastActiveAt    DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Story {
-  id               String    @id @default(cuid())
-  title            String
-  slug             String    @unique
-  shortDescription String
-  description      String
-  coverImage       String
-  bannerImage      String?
-  author           String    @default("PLOT Studio")
-  ageRating        String    @default("16+") // ALL | 13+ | 16+ | 18+
-  status           String    @default("PUBLISHED") // DRAFT | PUBLISHED | COMPLETED | ARCHIVED
-  featured         Boolean   @default(false)
-  viewCount        Int       @default(0)
-  startCount       Int       @default(0)
-  completionCount  Int       @default(0)
-  publishedAt      DateTime?
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
+  id                 String    @id @default(cuid())
+  title              String
+  titleId            String?   // Indonesian localized title
+  slug               String    @unique
+  shortDescription   String
+  shortDescriptionId String?   // Indonesian localized short pitch
+  description        String
+  descriptionId      String?   // Indonesian localized full synopsis
+  coverImage         String
+  bannerImage        String?
+  author             String    @default("PLOT Studio")
+  ageRating          String    @default("16+") // ALL | 13+ | 16+ | 18+
+  status             String    @default("PUBLISHED") // DRAFT | PUBLISHED | COMPLETED | ARCHIVED
+  featured           Boolean   @default(false)
+  viewCount          Int       @default(0)
+  startCount         Int       @default(0)
+  completionCount    Int       @default(0)
+  publishedAt        DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 
-  genres          StoryGenre[]
-  tags            StoryTag[]
-  characters      Character[]
-  statDefinitions StoryStatDefinition[]
-  episodes        Episode[]
-  endings         Ending[]
-  userProgress    UserStoryProgress[]
-  userChoices     UserChoice[]
+  genres            StoryGenre[]
+  tags              StoryTag[]
+  characters        Character[]
+  statDefinitions   StoryStatDefinition[]
+  episodes          Episode[]
+  endings           Ending[]
+  userProgress      UserStoryProgress[]
+  userChoices       UserChoice[]
   userRelationships UserRelationship[]
-  userStoryStats  UserStoryStat[]
+  userStoryStats    UserStoryStat[]
 
   @@index([status])
   @@index([featured])
@@ -125,11 +130,12 @@ model Story {
 }
 
 model Genre {
-  id        String       @id @default(cuid())
-  name      String       @unique
-  slug      String       @unique
-  icon      String?
-  stories   StoryGenre[]
+  id      String       @id @default(cuid())
+  name    String       @unique
+  nameId  String?
+  slug    String       @unique
+  icon    String?
+  stories StoryGenre[]
 }
 
 model StoryGenre {
@@ -157,9 +163,11 @@ model Character {
   id                  String           @id @default(cuid())
   storyId             String
   name                String
+  nameId              String?
   slug                String
   role                String           @default("SUPPORTING") // PROTAGONIST | MAIN_LOVE_INTEREST | LOVE_INTEREST | ANTAGONIST | SUPPORTING
   biography           String?
+  biographyId         String?
   avatarUrl           String?
   relationshipEnabled Boolean          @default(true)
   defaultLove         Int              @default(0)
@@ -192,6 +200,7 @@ model StoryStatDefinition {
   storyId      String
   key          String // e.g. REPUTATION, REVENGE
   label        String
+  labelId      String?
   description  String?
   defaultValue Int    @default(50)
   minVal       Int    @default(0)
@@ -209,7 +218,9 @@ model Episode {
   storyId      String
   number       Int
   title        String
+  titleId      String?
   synopsis     String?
+  synopsisId   String?
   status       String    @default("PUBLISHED") // DRAFT | PUBLISHED | ARCHIVED
   unlockType   String    @default("FREE") // FREE | COIN_LOCKED | PREMIUM
   coinPrice    Int       @default(0)
@@ -236,7 +247,7 @@ model StoryNode {
   nodeId     String   // e.g. "node_1", "choice_1", "scene_2" (unique within episode)
   nodeIndex  Int
   type       String   // DIALOGUE | NARRATION | CHOICE | STAT_CHANGE | RELATIONSHIP_CHANGE | SCENE_CHANGE | MUSIC_CHANGE | SFX | DELAY | JUMP | END_EPISODE | ENDING
-  configJson String   // Structured JSON validated by Zod
+  configJson String   // Structured JSON validated by Zod (supports text & textId)
   nextNodeId String?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
@@ -253,8 +264,11 @@ model Ending {
   storyId       String
   slug          String  // e.g. "true-love", "independent", "revenge", "secret"
   title         String
+  titleId       String?
   description   String
+  descriptionId String?
   badgeTitle    String
+  badgeTitleId  String?
   artworkUrl    String?
   conditionJson String? // Structured conditions required to unlock
   endingType    String  @default("TRUE_LOVE") // TRUE_LOVE | INDEPENDENT | REVENGE | SECRET
@@ -370,18 +384,20 @@ model Wallet {
 }
 
 model WalletTransaction {
-  id           String   @id @default(cuid())
-  walletId     String
-  currency     String   // COINS | DIAMONDS
-  amount       Int      // Positive for credit, negative for debit
-  type         String   // SIGNUP_BONUS | DAILY_REWARD | EPISODE_UNLOCK | PREMIUM_CHOICE | ADMIN_GRANT | PURCHASE | REFUND | MISSION_REWARD
-  source       String?
-  referenceId  String?
-  balanceAfter Int
-  description  String?
-  createdAt    DateTime @default(now())
+  id             String   @id @default(cuid())
+  walletId       String
+  currency       String   // COINS | DIAMONDS
+  amount         Int      // Positive for credit, negative for debit
+  type           String   // SIGNUP_BONUS | DAILY_REWARD | EPISODE_UNLOCK | PREMIUM_CHOICE | ADMIN_GRANT | PURCHASE | PAYMENT_PURCHASE | REFUND | MISSION_REWARD
+  source         String?
+  referenceId    String?
+  paymentOrderId String?  @unique
+  balanceAfter   Int
+  description    String?
+  createdAt      DateTime @default(now())
 
-  wallet Wallet @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  wallet       Wallet        @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  paymentOrder PaymentOrder? @relation(fields: [paymentOrderId], references: [id], onDelete: SetNull)
 
   @@index([walletId])
   @@index([type])
@@ -419,7 +435,9 @@ model Achievement {
   id            String   @id @default(cuid())
   code          String   @unique // FIRST_CHOICE | FIRST_EPISODE | FIRST_STORY_COMPLETE | HEARTBREAKER | HOPELESS_ROMANTIC | SECRET_ENDING | COMPLETIONIST
   title         String
+  titleId       String?
   description   String
+  descriptionId String?
   icon          String   @default("trophy")
   coinReward    Int      @default(10)
   diamondReward Int      @default(2)
@@ -441,6 +459,75 @@ model UserAchievement {
   @@unique([userId, achievementId])
   @@index([userId])
   @@index([achievementId])
+}
+
+model CurrencyPackage {
+  id           String   @id @default(cuid())
+  code         String   @unique // C1 | C2 | C3 | C4 | D1 | D2 | D3 | D4
+  currencyType String   // COINS | DIAMONDS
+  amount       Int
+  bonusAmount  Int      @default(0)
+  priceIDR     Int      // 10000 | 25000 | 50000 | 100000
+  label        String?  // e.g. "BEST STARTER", "POPULAR", "BEST VALUE"
+  labelId      String?
+  featured     Boolean  @default(false)
+  active       Boolean  @default(true)
+  sortOrder    Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  orders PaymentOrder[]
+
+  @@index([currencyType])
+  @@index([active])
+  @@index([sortOrder])
+}
+
+model PaymentOrder {
+  id              String    @id @default(cuid())
+  orderId         String    @unique // e.g. "PLOT-20260817-A7F41"
+  userId          String
+  packageId       String
+  currencyType    String    // COINS | DIAMONDS
+  currencyAmount  Int
+  priceIDR        Int
+  paymentMethod   String    // GOPAY | OVO
+  paymentNumber   String    @default("087797877931")
+  status          String    @default("AWAITING_PAYMENT") // CREATED | AWAITING_PAYMENT | PROOF_SUBMITTED | UNDER_REVIEW | APPROVED | REJECTED | EXPIRED | CANCELLED
+  proofImageUrl   String?
+  proofUploadedAt DateTime?
+  reviewedBy      String?   // Admin User ID
+  reviewedAt      DateTime?
+  rejectionReason String?
+  adminNote       String?
+  createdAt       DateTime  @default(now())
+  expiresAt       DateTime?
+  updatedAt       DateTime  @updatedAt
+
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  package           CurrencyPackage    @relation(fields: [packageId], references: [id])
+  auditLogs         PaymentAuditLog[]
+  walletTransaction WalletTransaction?
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model PaymentAuditLog {
+  id             String   @id @default(cuid())
+  paymentOrderId String
+  action         String   // CREATED | PROOF_SUBMITTED | APPROVED | REJECTED | CANCELLED
+  previousStatus String?
+  newStatus      String
+  performedBy    String   // user ID | admin ID | SYSTEM
+  note           String?
+  createdAt      DateTime @default(now())
+
+  paymentOrder PaymentOrder @relation(fields: [paymentOrderId], references: [id], onDelete: Cascade)
+
+  @@index([paymentOrderId])
+  @@index([createdAt])
 }
 
 model Asset {

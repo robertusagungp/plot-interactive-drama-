@@ -19,6 +19,7 @@ export const AdminSidebar: React.FC = () => {
 
   const links = [
     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+    { label: "E-Wallet Payments", href: "/admin/payments", icon: BarChart3 },
     { label: "Stories", href: "/admin/stories", icon: BookOpen },
     { label: "Characters", href: "/admin/characters", icon: Users },
     { label: "Asset Storage", href: "/admin/assets", icon: Image },

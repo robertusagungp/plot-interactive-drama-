@@ -12,6 +12,9 @@ import {
   TrendingUp,
   ArrowRight,
   ShieldCheck,
+  CreditCard,
+  Clock,
+  DollarSign,
 } from "lucide-react";
 
 export default async function AdminDashboardPage() {
@@ -56,11 +59,19 @@ export default async function AdminDashboardPage() {
               </span>
             </div>
             <p className="text-xs text-zinc-400 mt-1">
-              Production telemetry, story engagement, reader retention, and virtual currency volume.
+              Production telemetry, IDR revenue, manual GoPay/OVO payments, and reader retention funnel.
             </p>
           </div>
 
           <div className="flex items-center gap-2">
+            <Link
+              href="/admin/payments"
+              className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-bold text-white text-xs transition shadow-lg shadow-emerald-950/50 flex items-center gap-1.5"
+            >
+              <CreditCard className="w-3.5 h-3.5" />
+              <span>Verify Payments ({metrics.pendingOrdersCount})</span>
+            </Link>
+
             <Link
               href="/admin/stories"
               className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 font-bold text-white text-xs transition shadow-lg shadow-purple-950/50 flex items-center gap-1.5"
@@ -69,6 +80,44 @@ export default async function AdminDashboardPage() {
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
+        </div>
+
+        {/* Revenue Banner in IDR */}
+        <div className="p-6 rounded-3xl bg-gradient-to-r from-emerald-950/70 via-zinc-950 to-purple-950/60 border border-emerald-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-6 shadow-xl">
+          <div>
+            <span className="text-[10px] uppercase font-extrabold tracking-widest text-emerald-400">
+              Verified Revenue (Indonesian Rupiah)
+            </span>
+            <div className="flex items-baseline gap-2 mt-1">
+              <span className="text-3xl sm:text-4xl font-black text-white">
+                {metrics.formattedRevenue}
+              </span>
+              <span className="text-xs font-semibold text-emerald-300">
+                ({metrics.approvedOrdersCount} Approved Orders)
+              </span>
+            </div>
+            <p className="text-xs text-zinc-400 mt-1">
+              Today: <strong className="text-white">{metrics.formattedRevenueToday}</strong> • This Month:{" "}
+              <strong className="text-white">{metrics.formattedRevenueThisMonth}</strong>
+            </p>
+          </div>
+
+          {metrics.pendingOrdersCount > 0 && (
+            <Link
+              href="/admin/payments"
+              className="p-4 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center gap-3 text-left hover:bg-amber-500/30 transition"
+            >
+              <Clock className="w-6 h-6 text-amber-400 flex-shrink-0" />
+              <div>
+                <span className="text-xs font-black text-amber-200 block">
+                  {metrics.pendingOrdersCount} Payments Awaiting Verification
+                </span>
+                <span className="text-[10px] text-zinc-400">
+                  Click to review receipts & credit customer wallets.
+                </span>
+              </div>
+            </Link>
+          )}
         </div>
 
         {/* 6 Key Metric Cards */}
@@ -85,17 +134,17 @@ export default async function AdminDashboardPage() {
 
           <div className="p-4 rounded-2xl bg-zinc-900/90 border border-white/5 flex flex-col justify-between">
             <span className="text-[10px] font-bold uppercase text-zinc-500">
-              Story Views
+              Published Stories
             </span>
             <div className="flex items-baseline gap-1.5 mt-2">
-              <span className="text-2xl font-black text-white">{metrics.totalStoryViews}</span>
-              <TrendingUp className="w-4 h-4 text-sky-400 ml-auto" />
+              <span className="text-2xl font-black text-white">{metrics.publishedStories}</span>
+              <ShieldCheck className="w-4 h-4 text-purple-400 ml-auto" />
             </div>
           </div>
 
           <div className="p-4 rounded-2xl bg-zinc-900/90 border border-white/5 flex flex-col justify-between">
             <span className="text-[10px] font-bold uppercase text-zinc-500">
-              Choices Selected
+              Choices Made
             </span>
             <div className="flex items-baseline gap-1.5 mt-2">
               <span className="text-2xl font-black text-rose-400">{metrics.totalChoices}</span>
@@ -121,7 +170,7 @@ export default async function AdminDashboardPage() {
             </span>
             <div className="flex items-baseline gap-1.5 mt-2">
               <span className="text-2xl font-black text-amber-300">
-                {metrics.coinsSpentEstimate}
+                {metrics.totalCoinsSpent}
               </span>
               <Coins className="w-4 h-4 text-amber-400 ml-auto" />
             </div>
@@ -129,11 +178,13 @@ export default async function AdminDashboardPage() {
 
           <div className="p-4 rounded-2xl bg-zinc-900/90 border border-white/5 flex flex-col justify-between">
             <span className="text-[10px] font-bold uppercase text-zinc-500">
-              Active Stories
+              Diamonds Spent
             </span>
             <div className="flex items-baseline gap-1.5 mt-2">
-              <span className="text-2xl font-black text-white">{metrics.totalStories}</span>
-              <ShieldCheck className="w-4 h-4 text-purple-400 ml-auto" />
+              <span className="text-2xl font-black text-purple-300">
+                {metrics.totalDiamondsSpent}
+              </span>
+              <Gem className="w-4 h-4 text-purple-400 ml-auto" />
             </div>
           </div>
         </div>

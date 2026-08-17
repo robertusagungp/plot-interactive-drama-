@@ -2,8 +2,9 @@
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Volume2, VolumeX, Music, Zap, X, RotateCcw, HelpCircle } from "lucide-react";
+import { Volume2, VolumeX, Music, Zap, X, RotateCcw, Globe } from "lucide-react";
 import { soundManager } from "@/lib/services/audio";
+import { useI18n, LanguageSwitcher } from "@/lib/i18n/context";
 
 interface PlayerSettingsModalProps {
   isOpen: boolean;
@@ -16,6 +17,7 @@ export const PlayerSettingsModal: React.FC<PlayerSettingsModalProps> = ({
   onClose,
   onRestartEpisode,
 }) => {
+  const { t } = useI18n();
   const [isMuted, setIsMuted] = useState(soundManager.getMuted());
   const [musicVol, setMusicVol] = useState(soundManager.getMusicVolume());
   const [sfxVol, setSfxVol] = useState(soundManager.getSfxVolume());
@@ -50,7 +52,7 @@ export const PlayerSettingsModal: React.FC<PlayerSettingsModalProps> = ({
           >
             <div className="flex items-center justify-between mb-5">
               <h3 className="text-lg font-bold text-white tracking-wide">
-                Story Settings
+                {t("settingsTitle")}
               </h3>
               <button
                 onClick={onClose}
@@ -61,6 +63,17 @@ export const PlayerSettingsModal: React.FC<PlayerSettingsModalProps> = ({
             </div>
 
             <div className="flex flex-col gap-4">
+              {/* Language Switcher */}
+              <div className="flex items-center justify-between p-3 rounded-2xl bg-zinc-800/60 border border-white/5">
+                <div className="flex items-center gap-2.5">
+                  <Globe className="w-5 h-5 text-sky-400" />
+                  <span className="text-sm font-medium text-zinc-200">
+                    {t("languageSwitcher")}
+                  </span>
+                </div>
+                <LanguageSwitcher />
+              </div>
+
               {/* Master Mute */}
               <div className="flex items-center justify-between p-3 rounded-2xl bg-zinc-800/60 border border-white/5">
                 <div className="flex items-center gap-2.5">
@@ -70,7 +83,7 @@ export const PlayerSettingsModal: React.FC<PlayerSettingsModalProps> = ({
                     <Volume2 className="w-5 h-5 text-emerald-400" />
                   )}
                   <span className="text-sm font-medium text-zinc-200">
-                    Master Sound
+                    {t("muteAudio")}
                   </span>
                 </div>
                 <button
@@ -90,7 +103,7 @@ export const PlayerSettingsModal: React.FC<PlayerSettingsModalProps> = ({
                 <div className="flex justify-between text-xs text-zinc-300">
                   <span className="flex items-center gap-1.5">
                     <Music className="w-3.5 h-3.5 text-purple-400" />
-                    Background Music
+                    {t("bgmVolume")}
                   </span>
                   <span className="font-mono">{Math.round(musicVol * 100)}%</span>
                 </div>
@@ -110,7 +123,7 @@ export const PlayerSettingsModal: React.FC<PlayerSettingsModalProps> = ({
                 <div className="flex justify-between text-xs text-zinc-300">
                   <span className="flex items-center gap-1.5">
                     <Zap className="w-3.5 h-3.5 text-amber-400" />
-                    Sound Effects
+                    {t("sfxVolume")}
                   </span>
                   <span className="font-mono">{Math.round(sfxVol * 100)}%</span>
                 </div>
@@ -135,7 +148,7 @@ export const PlayerSettingsModal: React.FC<PlayerSettingsModalProps> = ({
                   className="w-full py-2.5 rounded-2xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-semibold flex items-center justify-center gap-2 border border-white/10 transition"
                 >
                   <RotateCcw className="w-4 h-4" />
-                  Restart This Episode
+                  {t("restartEpisode")}
                 </button>
               </div>
             </div>

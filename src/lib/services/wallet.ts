@@ -73,7 +73,8 @@ export async function unlockEpisodeForUser(
   });
 
   if (existingUnlock) {
-    return { success: true }; // Already unlocked, no charge
+    const wallet = await db.wallet.findUnique({ where: { userId } });
+    return { success: true, remainingCoins: wallet?.coins ?? 0 }; // Already unlocked, no charge
   }
 
   // Deduct coins atomically via transaction

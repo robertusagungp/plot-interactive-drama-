@@ -2,13 +2,16 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { Play, Lock, CheckCircle2, Coins, Sparkles } from "lucide-react";
+import { Play, Lock, CheckCircle2, Coins, RotateCcw } from "lucide-react";
+import { useI18n } from "@/lib/i18n/context";
 
 interface EpisodeItem {
   id: string;
   number: number;
   title: string;
+  titleId?: string | null;
   synopsis?: string | null;
+  synopsisId?: string | null;
   unlockType: string;
   coinPrice: number;
   isUnlocked?: boolean;
@@ -28,6 +31,7 @@ export const EpisodeList: React.FC<EpisodeListProps> = ({
   userCoins = 100,
   onUnlockEpisode,
 }) => {
+  const { t, locale } = useI18n();
   const [unlockingId, setUnlockingId] = useState<string | null>(null);
 
   const handleUnlock = async (e: React.MouseEvent, ep: EpisodeItem) => {
@@ -44,6 +48,8 @@ export const EpisodeList: React.FC<EpisodeListProps> = ({
       {episodes.map((ep) => {
         const isFree = ep.unlockType === "FREE" || ep.coinPrice === 0;
         const isAccessible = isFree || ep.isUnlocked;
+        const displayTitle = locale === "id" && ep.titleId ? ep.titleId : ep.title;
+        const displaySynopsis = locale === "id" && ep.synopsisId ? ep.synopsisId : ep.synopsis;
 
         return (
           <div
@@ -75,22 +81,22 @@ export const EpisodeList: React.FC<EpisodeListProps> = ({
               <div className="flex flex-col">
                 <div className="flex items-center gap-2">
                   <span className="text-xs uppercase font-bold text-zinc-500">
-                    Episode {ep.number}
+                    {t("episodeNumber", { num: ep.number })}
                   </span>
                   {isFree && (
                     <span className="px-2 py-0.2 rounded-full text-[9px] font-black uppercase bg-emerald-950/80 text-emerald-400 border border-emerald-500/30">
-                      Free
+                      {t("free")}
                     </span>
                   )}
                 </div>
 
                 <h4 className="text-sm md:text-base font-bold text-white group-hover:text-rose-400 transition-colors">
-                  {ep.title}
+                  {displayTitle}
                 </h4>
 
-                {ep.synopsis && (
+                {displaySynopsis && (
                   <p className="text-xs text-zinc-400 line-clamp-1 mt-0.5">
-                    {ep.synopsis}
+                    {displaySynopsis}
                   </p>
                 )}
               </div>
@@ -103,8 +109,17 @@ export const EpisodeList: React.FC<EpisodeListProps> = ({
                   href={`/story/${storySlug}/episode/${ep.number}`}
                   className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 font-bold text-white text-xs flex items-center gap-1.5 shadow-md shadow-rose-950/40 transition"
                 >
-                  <Play className="w-3.5 h-3.5 fill-current" />
-                  <span>{ep.isCompleted ? "Replay" : "Play"}</span>
+                  {ep.isCompleted ? (
+                    <>
+                      <RotateCcw className="w-3.5 h-3.5" />
+                      <span>{t("replayStory")}</span>
+                    </>
+                  ) : (
+                    <>
+                      <Play className="w-3.5 h-3.5 fill-current" />
+                      <span>{t("playNow")}</span>
+                    </>
+                  )}
                 </Link>
               ) : (
                 <Link
@@ -112,7 +127,9 @@ export const EpisodeList: React.FC<EpisodeListProps> = ({
                   className="px-3.5 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 font-bold text-amber-300 text-xs flex items-center gap-1.5 transition"
                 >
                   <Coins className="w-3.5 h-3.5" />
-                  <span>{ep.coinPrice} Coins</span>
+                  <span>
+                    {ep.coinPrice} {t("coins")}
+                  </span>
                 </Link>
               )}
             </div>

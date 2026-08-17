@@ -2,8 +2,10 @@
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Coins, Gem, Sparkles, Check, ArrowRight } from "lucide-react";
-import { COIN_PACKAGES, DIAMOND_PACKAGES } from "@/lib/services/payments";
+import { X, Coins, Gem, Sparkles, CreditCard, ArrowRight } from "lucide-react";
+import Link from "next/link";
+import { SEEDED_COIN_PACKAGES, SEEDED_DIAMOND_PACKAGES } from "@/lib/services/payments";
+import { useI18n } from "@/lib/i18n/context";
 
 interface WalletModalProps {
   isOpen: boolean;
@@ -20,32 +22,8 @@ export const WalletModal: React.FC<WalletModalProps> = ({
   diamonds,
   onSuccess,
 }) => {
+  const { t, locale, formatPrice } = useI18n();
   const [activeTab, setActiveTab] = useState<"coins" | "diamonds">("coins");
-  const [purchasingId, setPurchasingId] = useState<string | null>(null);
-  const [statusMsg, setStatusMsg] = useState<string | null>(null);
-
-  const handlePurchase = async (pkgId: string) => {
-    setPurchasingId(pkgId);
-    setStatusMsg(null);
-    try {
-      const res = await fetch("/api/wallet/topup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ packageId: pkgId }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        setStatusMsg(`Successfully added ${data.package.title}!`);
-        if (onSuccess) onSuccess();
-      } else {
-        setStatusMsg(data.error || "Purchase failed");
-      }
-    } catch {
-      setStatusMsg("Failed to connect to checkout service");
-    } finally {
-      setPurchasingId(null);
-    }
-  };
 
   return (
     <AnimatePresence>
@@ -67,9 +45,9 @@ export const WalletModal: React.FC<WalletModalProps> = ({
 
             {/* Header & Balance */}
             <div className="mb-4">
-              <h3 className="text-xl font-black text-white">PLOT Vault</h3>
+              <h3 className="text-xl font-black text-white">{t("navWallet")}</h3>
               <p className="text-xs text-zinc-400">
-                Unlock episodes with Coins and choose spicy premium paths with Diamonds.
+                {t("topupSubtitle")}
               </p>
             </div>
 
@@ -81,7 +59,7 @@ export const WalletModal: React.FC<WalletModalProps> = ({
                 </div>
                 <div>
                   <span className="text-[10px] uppercase font-bold text-zinc-400 block">
-                    Coins
+                    {t("coins")}
                   </span>
                   <span className="text-base font-extrabold text-amber-300">
                     {coins}
@@ -95,7 +73,7 @@ export const WalletModal: React.FC<WalletModalProps> = ({
                 </div>
                 <div>
                   <span className="text-[10px] uppercase font-bold text-zinc-400 block">
-                    Diamonds
+                    {t("diamonds")}
                   </span>
                   <span className="text-base font-extrabold text-purple-300">
                     {diamonds}
@@ -115,7 +93,7 @@ export const WalletModal: React.FC<WalletModalProps> = ({
                 }`}
               >
                 <Coins className="w-3.5 h-3.5" />
-                Coin Packs
+                <span>{t("coinShop")}</span>
               </button>
               <button
                 onClick={() => setActiveTab("diamonds")}
@@ -126,73 +104,78 @@ export const WalletModal: React.FC<WalletModalProps> = ({
                 }`}
               >
                 <Gem className="w-3.5 h-3.5" />
-                Diamond Packs
+                <span>{t("diamondShop")}</span>
               </button>
             </div>
 
-            {statusMsg && (
-              <div className="mb-4 p-2.5 rounded-xl bg-emerald-950/80 border border-emerald-500/40 text-emerald-200 text-xs font-bold text-center">
-                {statusMsg}
-              </div>
-            )}
-
             {/* Package Cards */}
             <div className="flex flex-col gap-2.5">
-              {(activeTab === "coins" ? COIN_PACKAGES : DIAMOND_PACKAGES).map((pkg) => (
-                <div
-                  key={pkg.id}
-                  className="flex items-center justify-between p-3.5 rounded-2xl bg-zinc-800/60 border border-white/5 hover:border-white/20 transition group"
-                >
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                        activeTab === "coins"
-                          ? "bg-amber-500/20 text-amber-400"
-                          : "bg-purple-500/20 text-purple-400"
-                      }`}
-                    >
-                      {activeTab === "coins" ? (
-                        <Coins className="w-5 h-5" />
-                      ) : (
-                        <Gem className="w-5 h-5" />
-                      )}
-                    </div>
+              {(activeTab === "coins" ? SEEDED_COIN_PACKAGES : SEEDED_DIAMOND_PACKAGES).map((pkg) => {
+                const label = locale === "id" && pkg.labelId ? pkg.labelId : pkg.label;
 
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-bold text-zinc-100">
-                          {pkg.title}
-                        </span>
-                        {pkg.badge && (
-                          <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-rose-500/20 text-rose-300 border border-rose-500/30">
-                            {pkg.badge}
-                          </span>
+                return (
+                  <Link
+                    key={pkg.id}
+                    href="/wallet"
+                    onClick={onClose}
+                    className="flex items-center justify-between p-3.5 rounded-2xl bg-zinc-800/60 border border-white/5 hover:border-white/20 transition group"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                          activeTab === "coins"
+                            ? "bg-amber-500/20 text-amber-400"
+                            : "bg-purple-500/20 text-purple-400"
+                        }`}
+                      >
+                        {activeTab === "coins" ? (
+                          <Coins className="w-5 h-5" />
+                        ) : (
+                          <Gem className="w-5 h-5" />
                         )}
                       </div>
-                      <span className="text-xs text-zinc-400">
-                        {pkg.amount}{" "}
-                        {pkg.bonusAmount > 0 ? `+ ${pkg.bonusAmount} Free Bonus` : ""}
-                      </span>
-                    </div>
-                  </div>
 
-                  <button
-                    onClick={() => handlePurchase(pkg.id)}
-                    disabled={purchasingId !== null}
-                    className={`px-4 py-2 rounded-xl text-xs font-bold transition shadow ${
-                      activeTab === "coins"
-                        ? "bg-amber-500 hover:bg-amber-400 text-zinc-950"
-                        : "bg-purple-600 hover:bg-purple-500 text-white"
-                    }`}
-                  >
-                    {purchasingId === pkg.id ? "Adding..." : `$${pkg.priceUsd}`}
-                  </button>
-                </div>
-              ))}
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-bold text-zinc-100">
+                            {pkg.amount} {activeTab === "coins" ? t("coins") : t("diamonds")}
+                          </span>
+                          {label && (
+                            <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                              {label}
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-xs text-zinc-400">
+                          {pkg.code} • GoPay / OVO
+                        </span>
+                      </div>
+                    </div>
+
+                    <span
+                      className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition shadow ${
+                        activeTab === "coins"
+                          ? "bg-amber-500 group-hover:bg-amber-400 text-zinc-950"
+                          : "bg-purple-600 group-hover:bg-purple-500 text-white"
+                      }`}
+                    >
+                      {formatPrice(pkg.priceIDR)}
+                    </span>
+                  </Link>
+                );
+              })}
             </div>
 
-            <div className="mt-4 pt-3 border-t border-white/5 text-[11px] text-zinc-500 text-center">
-              💡 Dev Mode Active: Instant top-up testing enabled.
+            <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-xs text-zinc-400">
+              <span>GoPay & OVO E-Wallet</span>
+              <Link
+                href="/wallet"
+                onClick={onClose}
+                className="text-rose-400 font-bold hover:underline flex items-center gap-1"
+              >
+                <span>{t("topupTitle")}</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
             </div>
           </motion.div>
         </div>

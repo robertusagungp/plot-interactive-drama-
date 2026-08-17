@@ -4,7 +4,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { EpisodeList } from "@/components/story/EpisodeList";
 import Link from "next/link";
-import { Play, Sparkles, Heart, Shield, Award, Users, BookOpen, Share2, ArrowLeft } from "lucide-react";
+import { Play, Sparkles, Heart, Users, BookOpen, ArrowLeft } from "lucide-react";
 import type { Metadata } from "next";
 
 export async function generateMetadata({
@@ -44,7 +44,7 @@ export default async function StoryDetailPage({
 
   // Fetch user progress and unlocks if logged in
   let userProgress: any = null;
-  let unlockedEpisodeIds = new Set<string>();
+  const unlockedEpisodeIds = new Set<string>();
   let userCoins = 100;
 
   if (user) {
@@ -74,7 +74,9 @@ export default async function StoryDetailPage({
     id: ep.id,
     number: ep.number,
     title: ep.title,
+    titleId: ep.titleId,
     synopsis: ep.synopsis,
+    synopsisId: ep.synopsisId,
     unlockType: ep.unlockType,
     coinPrice: ep.coinPrice,
     isUnlocked: unlockedEpisodeIds.has(ep.id),
@@ -203,7 +205,9 @@ export default async function StoryDetailPage({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <BookOpen className="w-5 h-5 text-amber-400" />
-            <h2 className="text-xl font-bold text-white">Episodes (10)</h2>
+            <h2 className="text-xl font-bold text-white">
+              Episodes ({story.episodes.length})
+            </h2>
           </div>
           <span className="text-xs text-zinc-400">
             Episodes 1–3 are completely free

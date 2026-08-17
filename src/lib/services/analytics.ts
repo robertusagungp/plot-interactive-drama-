@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import { formatIDR } from "@/lib/i18n";
 
 export async function trackEvent(
   eventName: string,
@@ -38,12 +39,16 @@ export async function recordUserChoice(data: {
       },
     });
 
-    await trackEvent("choice_selected", {
-      storyId: data.storyId,
-      episodeId: data.episodeId,
-      nodeId: data.nodeId,
-      choiceOptionId: data.choiceOptionId,
-    }, data.userId);
+    await trackEvent(
+      "choice_selected",
+      {
+        storyId: data.storyId,
+        episodeId: data.episodeId,
+        nodeId: data.nodeId,
+        choiceOptionId: data.choiceOptionId,
+      },
+      data.userId
+    );
   } catch {}
 }
 
@@ -79,17 +84,40 @@ export async function getAdminAnalyticsSummary() {
   const [
     totalUsers,
     totalStories,
+    publishedStories,
     totalStoryViews,
     totalChoices,
     totalEpisodeUnlocks,
+    approvedOrders,
+    pendingOrdersCount,
+    rejectedOrdersCount,
+    coinSpentAggregate,
+    diamondSpentAggregate,
     recentEvents,
     popularStories,
   ] = await Promise.all([
     db.user.count(),
     db.story.count(),
+    db.story.count({ where: { status: "PUBLISHED" } }),
     db.analyticsEvent.count({ where: { eventName: "story_view" } }),
     db.userChoice.count(),
     db.episodeUnlock.count(),
+    db.paymentOrder.findMany({
+      where: { status: "APPROVED" },
+      select: { priceIDR: true, createdAt: true },
+    }),
+    db.paymentOrder.count({
+      where: { status: { in: ["AWAITING_PAYMENT", "PROOF_SUBMITTED", "UNDER_REVIEW"] } },
+    }),
+    db.paymentOrder.count({ where: { status: "REJECTED" } }),
+    db.walletTransaction.aggregate({
+      where: { currency: "COINS", amount: { lt: 0 } },
+      _sum: { amount: true },
+    }),
+    db.walletTransaction.aggregate({
+      where: { currency: "DIAMONDS", amount: { lt: 0 } },
+      _sum: { amount: true },
+    }),
     db.analyticsEvent.findMany({
       take: 15,
       orderBy: { createdAt: "desc" },
@@ -105,12 +133,29 @@ export async function getAdminAnalyticsSummary() {
     }),
   ]);
 
+  // Calculate actual approved revenue in IDR
+  const totalApprovedRevenueIDR = approvedOrders.reduce((sum, o) => sum + o.priceIDR, 0);
+
+  const now = new Date();
+  const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+  const revenueTodayIDR = approvedOrders
+    .filter((o) => new Date(o.createdAt) >= startOfDay)
+    .reduce((sum, o) => sum + o.priceIDR, 0);
+
+  const revenueThisMonthIDR = approvedOrders
+    .filter((o) => new Date(o.createdAt) >= startOfMonth)
+    .reduce((sum, o) => sum + o.priceIDR, 0);
+
+  const totalCoinsSpent = Math.abs(coinSpentAggregate._sum.amount || 0);
+  const totalDiamondsSpent = Math.abs(diamondSpentAggregate._sum.amount || 0);
+
   // Aggregate Funnel Metrics
-  const [starts, ep1Done, ep2Done, ep3Done, ep4Done] = await Promise.all([
+  const [starts, ep1Done, ep2Done, ep4Done] = await Promise.all([
     db.analyticsEvent.count({ where: { eventName: "story_start" } }),
     db.analyticsEvent.count({ where: { eventName: "episode_complete" } }),
     db.userEpisodeProgress.count({ where: { isCompleted: true } }),
-    db.episodeUnlock.count(),
     db.userStoryProgress.count({ where: { isCompleted: true } }),
   ]);
 
@@ -118,10 +163,21 @@ export async function getAdminAnalyticsSummary() {
     metrics: {
       totalUsers,
       totalStories,
+      publishedStories,
       totalStoryViews: totalStoryViews || 1420,
       totalChoices: totalChoices || 874,
       totalEpisodeUnlocks: totalEpisodeUnlocks || 320,
-      coinsSpentEstimate: totalEpisodeUnlocks * 15,
+      totalCoinsSpent,
+      totalDiamondsSpent,
+      pendingOrdersCount,
+      rejectedOrdersCount,
+      approvedOrdersCount: approvedOrders.length,
+      totalApprovedRevenueIDR,
+      revenueTodayIDR,
+      revenueThisMonthIDR,
+      formattedRevenue: formatIDR(totalApprovedRevenueIDR),
+      formattedRevenueToday: formatIDR(revenueTodayIDR),
+      formattedRevenueThisMonth: formatIDR(revenueThisMonthIDR),
     },
     funnel: [
       { step: "Story Views", count: totalStoryViews || 1420, percent: 100 },

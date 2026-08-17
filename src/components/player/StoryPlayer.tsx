@@ -2,7 +2,18 @@
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Settings, Coins, Gem, Sparkles, ChevronRight, Lock } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  ArrowLeft,
+  Settings,
+  Coins,
+  Gem,
+  Lock,
+  Sparkles,
+  ChevronRight,
+  Play,
+  RotateCcw,
+} from "lucide-react";
 import Link from "next/link";
 import {
   StoryNodeData,
@@ -10,14 +21,15 @@ import {
   MotionPreset,
   StoryChoiceOption,
 } from "@/lib/types/story";
+import { evaluateAllConditions } from "@/lib/story-evaluator";
+import { soundManager } from "@/lib/services/audio";
 import { SceneView } from "./SceneView";
 import { DialogueBox } from "./DialogueBox";
 import { ChoiceOverlay } from "./ChoiceOverlay";
-import { StatToast, StatNotification } from "./StatToast";
 import { EndingScreen } from "./EndingScreen";
 import { PlayerSettingsModal } from "./PlayerSettingsModal";
-import { soundManager } from "@/lib/services/audio";
-import { evaluateAllConditions } from "@/lib/story-evaluator";
+import { StatToast, StatNotification } from "./StatToast";
+import { useI18n } from "@/lib/i18n/context";
 
 interface StoryPlayerProps {
   storyId: string;
@@ -27,17 +39,29 @@ interface StoryPlayerProps {
   episodeNumber: number;
   episodeTitle: string;
   nodes: StoryNodeData[];
+  initialNodeId?: string;
   initialCoins?: number;
   initialDiamonds?: number;
   initialStats?: Record<string, number>;
   initialRelationships?: Record<string, { love: number; trust: number }>;
   initialChoicesMade?: Record<string, string>;
-  initialNodeId?: string;
   isUnlocked?: boolean;
   coinPrice?: number;
   onUnlockEpisode?: () => Promise<boolean>;
-  onSaveProgress?: (data: any) => Promise<void>;
-  onChoiceSelected?: (data: { nodeId: string; optionId: string; optionText: string }) => Promise<void>;
+  onSaveProgress?: (progress: {
+    episodeNumber: number;
+    isCompleted: boolean;
+    lastNodeId?: string;
+    endingSlug?: string;
+    stats: Record<string, number>;
+    relationships: Record<string, { love: number; trust: number }>;
+    choicesMade: Record<string, string>;
+  }) => void;
+  onChoiceSelected?: (choice: {
+    nodeId: string;
+    optionId: string;
+    optionText: string;
+  }) => void;
   isLoggedIn?: boolean;
 }
 
@@ -49,12 +73,12 @@ export const StoryPlayer: React.FC<StoryPlayerProps> = ({
   episodeNumber,
   episodeTitle,
   nodes,
+  initialNodeId,
   initialCoins = 100,
   initialDiamonds = 20,
   initialStats = { REPUTATION: 50, REVENGE: 50 },
-  initialRelationships = { adrian: { love: 10, trust: 15 }, luca: { love: 30, trust: 60 } },
+  initialRelationships = {},
   initialChoicesMade = {},
-  initialNodeId,
   isUnlocked = true,
   coinPrice = 0,
   onUnlockEpisode,
@@ -63,6 +87,7 @@ export const StoryPlayer: React.FC<StoryPlayerProps> = ({
   isLoggedIn = false,
 }) => {
   const router = useRouter();
+  const { t, locale } = useI18n();
 
   // Story Engine State
   const [currentNodeId, setCurrentNodeId] = useState<string>(
@@ -128,24 +153,23 @@ export const StoryPlayer: React.FC<StoryPlayerProps> = ({
           if (config.backgroundSlug) setBackgroundSlug(config.backgroundSlug);
           if (config.backgroundUrl) setBackgroundUrl(config.backgroundUrl);
           if (config.musicTrack) soundManager.playBgm(config.musicTrack);
-          if (config.transition === "flash") {
-            setOverlayEffect("flash");
-            setTimeout(() => setOverlayEffect("none"), 400);
+          if (config.transition) {
+            setOverlayEffect(config.transition as MotionPreset);
+            setTimeout(() => setOverlayEffect("none"), 600);
           }
-
-          if (config.charactersPresent) {
-            const nextChars: Record<string, PlayerCharacterState> = {};
+          if (config.charactersPresent && Array.isArray(config.charactersPresent)) {
+            const nextActive: Record<string, PlayerCharacterState> = {};
             config.charactersPresent.forEach((cp: any) => {
-              nextChars[cp.characterSlug] = {
+              nextActive[cp.characterSlug] = {
                 slug: cp.characterSlug,
-                name: cp.characterSlug.toUpperCase(),
+                name: cp.name || cp.characterSlug,
                 expression: cp.expression || "normal",
                 position: cp.position || "center",
                 isVisible: true,
                 animation: "fade-in",
               };
             });
-            setActiveCharacters(nextChars);
+            setActiveCharacters(nextActive);
           }
           break;
         }
@@ -343,14 +367,73 @@ export const StoryPlayer: React.FC<StoryPlayerProps> = ({
 
   // Handle Choice Selection
   const handleSelectChoiceOption = async (option: StoryChoiceOption) => {
-    // Deduct cost atomically
-    if (option.diamondCost > 0) {
-      setUserDiamonds((prev) => Math.max(0, prev - option.diamondCost));
-      soundManager.playSfx("diamond_spent");
-    }
-    if (option.coinCost > 0) {
-      setUserCoins((prev) => Math.max(0, prev - option.coinCost));
-      soundManager.playSfx("coin_spent");
+    // If choice requires currency, execute server spending
+    if (option.diamondCost > 0 || option.coinCost > 0) {
+      if (option.diamondCost > 0 && userDiamonds < option.diamondCost) {
+        pushNotification({
+          type: "stat",
+          title: t("notEnoughDiamonds"),
+          amount: 0,
+        });
+        return;
+      }
+      if (option.coinCost > 0 && userCoins < option.coinCost) {
+        pushNotification({
+          type: "stat",
+          title: t("notEnoughCoins"),
+          amount: 0,
+        });
+        return;
+      }
+
+      // Call API
+      try {
+        const res = await fetch("/api/story/choice", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            storyId,
+            episodeId,
+            nodeId: currentNode.nodeId,
+            choiceOptionId: option.id,
+            choiceOptionText: option.text,
+            diamondCost: option.diamondCost || 0,
+            coinCost: option.coinCost || 0,
+          }),
+        });
+        const data = await res.json();
+        if (!data.success && data.error?.includes("INSUFFICIENT")) {
+          pushNotification({
+            type: "stat",
+            title: option.diamondCost > 0 ? t("notEnoughDiamonds") : t("notEnoughCoins"),
+            amount: 0,
+          });
+          return;
+        }
+        if (data.wallet) {
+          if (data.wallet.diamonds !== undefined) setUserDiamonds(data.wallet.diamonds);
+          if (data.wallet.coins !== undefined) setUserCoins(data.wallet.coins);
+        }
+      } catch {}
+
+      if (option.diamondCost > 0) {
+        setUserDiamonds((prev) => Math.max(0, prev - option.diamondCost));
+        soundManager.playSfx("diamond_spent");
+        pushNotification({
+          type: "stat",
+          title: `-${option.diamondCost} ${t("diamonds")}`,
+          amount: -option.diamondCost,
+        });
+      }
+      if (option.coinCost > 0) {
+        setUserCoins((prev) => Math.max(0, prev - option.coinCost));
+        soundManager.playSfx("coin_spent");
+        pushNotification({
+          type: "stat",
+          title: `-${option.coinCost} ${t("coins")}`,
+          amount: -option.coinCost,
+        });
+      }
     }
 
     // Apply Choice Effects
@@ -414,9 +497,47 @@ export const StoryPlayer: React.FC<StoryPlayerProps> = ({
         setIsLockedPrompt(false);
         setUserCoins((prev) => Math.max(0, prev - coinPrice));
         soundManager.playSfx("coin_spent");
+        pushNotification({
+          type: "stat",
+          title: `-${coinPrice} ${t("coins")}`,
+          amount: -coinPrice,
+        });
       }
     } else {
-      setIsLockedPrompt(false);
+      try {
+        const res = await fetch("/api/story/unlock", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ episodeId }),
+        });
+        const data = await res.json();
+        if (data.success) {
+          setIsLockedPrompt(false);
+          if (data.remainingCoins !== undefined) {
+            setUserCoins(data.remainingCoins);
+          } else {
+            setUserCoins((prev) => Math.max(0, prev - coinPrice));
+          }
+          soundManager.playSfx("coin_spent");
+          pushNotification({
+            type: "stat",
+            title: `-${coinPrice} ${t("coins")}`,
+            amount: -coinPrice,
+          });
+        } else {
+          pushNotification({
+            type: "stat",
+            title: t("notEnoughCoins"),
+            amount: 0,
+          });
+        }
+      } catch {
+        pushNotification({
+          type: "stat",
+          title: t("notEnoughCoins"),
+          amount: 0,
+        });
+      }
     }
   };
 
@@ -442,14 +563,27 @@ export const StoryPlayer: React.FC<StoryPlayerProps> = ({
 
   // Show Ending Screen
   if (activeEnding) {
+    const endingTitleStr =
+      locale === "id" && activeEnding.endingTitleId
+        ? activeEnding.endingTitleId
+        : activeEnding.endingTitle || "The Final Truth";
+    const summaryStr =
+      locale === "id" && activeEnding.summaryId
+        ? activeEnding.summaryId
+        : activeEnding.summary || "";
+    const badgeStr =
+      locale === "id" && activeEnding.badgeTitleId
+        ? activeEnding.badgeTitleId
+        : activeEnding.badgeTitle || "ENDING REACHED";
+
     return (
       <EndingScreen
         storyTitle={storyTitle}
         storySlug={storySlug}
-        endingTitle={activeEnding.endingTitle || "The Final Truth"}
+        endingTitle={endingTitleStr}
         endingType={activeEnding.endingType || "TRUE_LOVE"}
-        badgeTitle={activeEnding.badgeTitle || "Ending Unlocked"}
-        summary={activeEnding.summary || "You navigated the web of deceit and unlocked your destiny."}
+        badgeTitle={badgeStr}
+        summary={summaryStr}
         stats={stats}
         relationships={relationships}
         onReplay={() => {
@@ -457,137 +591,49 @@ export const StoryPlayer: React.FC<StoryPlayerProps> = ({
           setCurrentNodeId(nodes[0]?.nodeId || "");
         }}
         onRestartStory={() => {
+          localStorage.removeItem(`plot_progress_${storySlug}`);
           router.push(`/story/${storySlug}`);
         }}
       />
     );
   }
 
-  // Show Locked Episode Paywall
-  if (isLockedPrompt) {
-    return (
-      <div className="relative w-full h-full min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4">
-        <div className="w-full max-w-md bg-zinc-900 border border-amber-500/30 rounded-3xl p-6 text-center shadow-2xl backdrop-blur-xl">
-          <div className="w-16 h-16 rounded-full bg-amber-500/20 border border-amber-500/40 flex items-center justify-center mx-auto mb-4">
-            <Lock className="w-8 h-8 text-amber-400" />
-          </div>
-          <span className="text-xs uppercase font-extrabold tracking-widest text-amber-400">
-            Locked Episode {episodeNumber}
-          </span>
-          <h2 className="text-xl font-bold text-white mt-1 mb-2">{episodeTitle}</h2>
-          <p className="text-sm text-zinc-300 mb-6">
-            Unlock this dramatic chapter to discover what Adrian and Sarah do next.
-          </p>
+  // Determine localized dialogue text
+  const dialogueText =
+    locale === "id" && currentNode?.config?.textId
+      ? currentNode.config.textId
+      : currentNode?.config?.text || "";
 
-          <div className="flex items-center justify-center gap-2 p-3 rounded-2xl bg-zinc-800/80 border border-white/10 mb-6">
-            <Coins className="w-5 h-5 text-amber-400" />
-            <span className="text-base font-extrabold text-white">
-              {coinPrice} Coins
-            </span>
-            <span className="text-xs text-zinc-400">
-              (You have {userCoins} coins)
-            </span>
-          </div>
+  const dialogueSpeaker =
+    locale === "id" && currentNode?.config?.speakerId
+      ? currentNode.config.speakerId
+      : currentNode?.config?.speaker;
 
-          <div className="flex flex-col gap-3">
-            {userCoins >= coinPrice ? (
-              <button
-                onClick={handleUnlockEpisodeClick}
-                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-rose-600 hover:from-amber-400 hover:to-rose-500 font-bold text-white text-sm shadow-lg shadow-amber-900/30 transition"
-              >
-                Unlock Episode {episodeNumber}
-              </button>
-            ) : (
-              <Link
-                href="/wallet"
-                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 font-bold text-white text-sm shadow-lg flex items-center justify-center gap-2"
-              >
-                <Coins className="w-4 h-4" />
-                Get More Coins in Wallet
-              </Link>
-            )}
+  const narrationText =
+    locale === "id" && currentNode?.config?.textId
+      ? currentNode.config.textId
+      : currentNode?.config?.text || "";
 
-            <Link
-              href={`/story/${storySlug}`}
-              className="py-2.5 text-xs text-zinc-400 hover:text-zinc-200 transition"
-            >
-              Return to Story Menu
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const choicePrompt =
+    locale === "id" && currentNode?.config?.promptId
+      ? currentNode.config.promptId
+      : currentNode?.config?.prompt || t("makeYourChoice");
 
-  // Show Episode Completion Screen
-  if (isEpisodeFinished) {
-    return (
-      <div className="relative w-full h-full min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4">
-        <div className="w-full max-w-md bg-zinc-900 border border-white/15 rounded-3xl p-6 text-center shadow-2xl backdrop-blur-xl">
-          <div className="w-14 h-14 rounded-full bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center mx-auto mb-3">
-            <Sparkles className="w-7 h-7 text-emerald-400" />
-          </div>
-
-          <span className="text-xs uppercase font-extrabold tracking-widest text-emerald-400">
-            Episode {episodeNumber} Complete!
-          </span>
-          <h2 className="text-xl font-black text-white mt-1 mb-2">{episodeTitle}</h2>
-
-          {endEpisodeConfig?.teaserText && (
-            <p className="text-xs text-zinc-300 italic mb-5 p-3 rounded-2xl bg-black/40 border border-white/5">
-              "{endEpisodeConfig.teaserText}"
-            </p>
-          )}
-
-          {/* Episode Rewards */}
-          <div className="flex justify-center gap-4 mb-6">
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-950/60 border border-amber-500/30 text-amber-300 text-xs font-bold">
-              <Coins className="w-3.5 h-3.5" />
-              +{endEpisodeConfig?.rewardCoins ?? 10} Coins
-            </div>
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-purple-950/60 border border-purple-500/30 text-purple-300 text-xs font-bold">
-              <Gem className="w-3.5 h-3.5" />
-              +{endEpisodeConfig?.rewardDiamonds ?? 2} Diamonds
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-2.5">
-            <button
-              onClick={() => {
-                const nextEp = episodeNumber + 1;
-                router.push(`/story/${storySlug}/episode/${nextEp}`);
-              }}
-              className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-500 hover:to-amber-500 font-bold text-white text-sm shadow-lg flex items-center justify-center gap-2"
-            >
-              <span>Continue to Episode {episodeNumber + 1}</span>
-              <ChevronRight className="w-4 h-4" />
-            </button>
-
-            <Link
-              href={`/story/${storySlug}`}
-              className="w-full py-3 rounded-2xl bg-zinc-800 hover:bg-zinc-700 font-medium text-zinc-300 text-xs border border-white/10"
-            >
-              Back to Episodes
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  const isChoiceNode = currentNode?.type === "CHOICE";
-  const isNarrationNode = currentNode?.type === "NARRATION";
-  const isDialogueNode = currentNode?.type === "DIALOGUE";
+  const localizedOptions = (currentNode?.config?.options || []).map((opt: any) => ({
+    ...opt,
+    text: locale === "id" && opt.textId ? opt.textId : opt.text,
+  }));
 
   return (
     <div className="relative w-full h-full min-h-screen bg-black flex items-center justify-center overflow-hidden">
-      {/* Desktop Cinematic Frame Container (Constrained 390-430px vertical mobile viewport on desktop) */}
+      {/* Constrained Cinematic Vertical Container on Desktop */}
       <div className="relative w-full h-full md:h-[92vh] md:max-w-[420px] md:rounded-[36px] overflow-hidden shadow-[0_0_80px_rgba(0,0,0,0.9)] md:border md:border-white/15 flex flex-col justify-between bg-slate-950">
-        {/* Floating Stat Popups */}
+        {/* Floating Stat & Relationship Toasts */}
         <StatToast notifications={notifications} />
 
-        {/* Top HUD */}
+        {/* Top Floating HUD Bar */}
         <div className="absolute top-0 inset-x-0 z-40 flex items-center justify-between p-3.5 bg-gradient-to-b from-black/80 via-black/40 to-transparent pointer-events-auto">
+          {/* Back Button */}
           <Link
             href={`/story/${storySlug}`}
             className="p-2 rounded-full bg-black/40 hover:bg-black/70 border border-white/10 text-zinc-300 hover:text-white backdrop-blur-md transition"
@@ -596,12 +642,13 @@ export const StoryPlayer: React.FC<StoryPlayerProps> = ({
             <ArrowLeft className="w-4 h-4" />
           </Link>
 
+          {/* Episode Badge */}
           <div className="px-3 py-1 rounded-full bg-black/50 border border-white/10 backdrop-blur-md text-[11px] font-bold text-zinc-200">
             Ep. {episodeNumber}
           </div>
 
+          {/* Currency Pill & Settings Button */}
           <div className="flex items-center gap-2">
-            {/* Wallet Quick View */}
             <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-black/50 border border-white/10 backdrop-blur-md text-xs font-bold">
               <span className="flex items-center gap-1 text-amber-400">
                 <Coins className="w-3 h-3" />
@@ -616,19 +663,73 @@ export const StoryPlayer: React.FC<StoryPlayerProps> = ({
             <button
               onClick={() => setIsSettingsOpen(true)}
               className="p-2 rounded-full bg-black/40 hover:bg-black/70 border border-white/10 text-zinc-300 hover:text-white backdrop-blur-md transition"
-              aria-label="Settings"
+              aria-label={t("settingsTitle")}
             >
               <Settings className="w-4 h-4" />
             </button>
           </div>
         </div>
 
-        {/* Visual Scene Stage */}
+        {/* Locked Episode Paywall Modal */}
+        {isLockedPrompt && (
+          <div className="absolute inset-0 z-50 flex items-center justify-center p-5 bg-black/90 backdrop-blur-xl">
+            <div className="w-full max-w-sm rounded-3xl bg-zinc-900 border border-amber-500/30 p-6 text-center shadow-2xl flex flex-col items-center gap-4">
+              <div className="w-14 h-14 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400">
+                <Lock className="w-7 h-7" />
+              </div>
+
+              <div>
+                <span className="text-[10px] font-extrabold uppercase tracking-widest text-amber-400">
+                  Episode {episodeNumber}
+                </span>
+                <h3 className="text-xl font-black text-white mt-1">
+                  {episodeTitle}
+                </h3>
+                <p className="text-xs text-zinc-400 mt-2 leading-relaxed">
+                  {t("unlockEpisodeDesc")}
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-2 w-full mt-2">
+                <button
+                  onClick={handleUnlockEpisodeClick}
+                  disabled={userCoins < coinPrice}
+                  className={`w-full py-3.5 rounded-2xl font-black text-sm flex items-center justify-center gap-2 shadow-lg transition ${
+                    userCoins >= coinPrice
+                      ? "bg-amber-500 hover:bg-amber-400 text-zinc-950 shadow-amber-950/50"
+                      : "bg-zinc-800 text-zinc-500 border border-white/10 cursor-not-allowed"
+                  }`}
+                >
+                  <Coins className="w-4 h-4" />
+                  <span>
+                    {t("unlockFor")} {coinPrice} {t("coins")}
+                  </span>
+                </button>
+
+                {userCoins < coinPrice && (
+                  <Link
+                    href="/wallet"
+                    className="w-full py-3 rounded-2xl bg-rose-600 hover:bg-rose-500 font-bold text-white text-xs text-center shadow-md transition"
+                  >
+                    {t("buyCoins")}
+                  </Link>
+                )}
+
+                <Link
+                  href={`/story/${storySlug}`}
+                  className="text-xs text-zinc-400 hover:text-zinc-200 mt-1 py-1"
+                >
+                  {t("episodeGuide")}
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Scene Viewport & Tap Surface */}
         <div
+          onClick={advanceNode}
           className="absolute inset-0 w-full h-full cursor-pointer"
-          onClick={() => {
-            if (!isChoiceNode) advanceNode();
-          }}
         >
           <SceneView
             backgroundSlug={backgroundSlug}
@@ -639,12 +740,65 @@ export const StoryPlayer: React.FC<StoryPlayerProps> = ({
           />
         </div>
 
-        {/* Interactive Bottom Layer */}
+        {/* Interactive Bottom Layer: Dialogue / Narration / Choices */}
         <div className="relative z-30 mt-auto w-full">
-          {isChoiceNode ? (
+          {/* Episode Complete Modal */}
+          {isEpisodeFinished && !activeEnding && (
+            <div className="p-4 w-full">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 15 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                className="w-full max-w-lg mx-auto rounded-3xl bg-zinc-950/95 border border-emerald-500/30 p-5 backdrop-blur-2xl shadow-2xl text-center flex flex-col items-center gap-3"
+              >
+                <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400">
+                  <Sparkles className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-white">
+                    {t("episodeCompletedTitle")}
+                  </h3>
+                  <p className="text-xs text-emerald-300 font-semibold mt-1">
+                    {t("episodeCompletedReward", {
+                      coins: endEpisodeConfig?.rewardCoins || 10,
+                      diamonds: endEpisodeConfig?.rewardDiamonds || 2,
+                    })}
+                  </p>
+                  {endEpisodeConfig?.teaserText && (
+                    <p className="text-xs text-zinc-400 mt-2 italic">
+                      "{endEpisodeConfig.teaserText}"
+                    </p>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2 w-full mt-2">
+                  <button
+                    onClick={() => {
+                      setIsEpisodeFinished(false);
+                      setCurrentNodeId(nodes[0]?.nodeId || "");
+                    }}
+                    className="p-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-white/10"
+                    title={t("restartEpisode")}
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                  </button>
+
+                  <Link
+                    href={`/story/${storySlug}/episode/${episodeNumber + 1}`}
+                    className="flex-1 py-3 px-4 rounded-2xl bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-500 hover:to-amber-500 font-extrabold text-white text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-rose-950/50"
+                  >
+                    <span>{t("nextEpisodeButton", { num: episodeNumber + 1 })}</span>
+                    <ChevronRight className="w-4 h-4" />
+                  </Link>
+                </div>
+              </motion.div>
+            </div>
+          )}
+
+          {/* Choice Overlay */}
+          {!isEpisodeFinished && currentNode?.type === "CHOICE" && (
             <ChoiceOverlay
-              prompt={currentNode.config.prompt}
-              options={currentNode.config.options || []}
+              prompt={choicePrompt}
+              options={localizedOptions}
               userCoins={userCoins}
               userDiamonds={userDiamonds}
               stats={stats}
@@ -653,23 +807,29 @@ export const StoryPlayer: React.FC<StoryPlayerProps> = ({
               onSelectOption={handleSelectChoiceOption}
               onOpenWallet={() => router.push("/wallet")}
             />
-          ) : isNarrationNode ? (
+          )}
+
+          {/* Dialogue Box */}
+          {!isEpisodeFinished && currentNode?.type === "DIALOGUE" && (
+            <DialogueBox
+              speaker={dialogueSpeaker}
+              characterSlug={currentNode.config.characterSlug}
+              text={dialogueText}
+              onAdvance={advanceNode}
+              isChoiceActive={false}
+            />
+          )}
+
+          {/* Narration Box */}
+          {!isEpisodeFinished && currentNode?.type === "NARRATION" && (
             <DialogueBox
               isNarration={true}
-              narrationStyle={currentNode.config.style}
-              text={currentNode.config.text || ""}
+              narrationStyle={currentNode.config.style || "standard"}
+              text={narrationText}
               onAdvance={advanceNode}
               isChoiceActive={false}
             />
-          ) : isDialogueNode ? (
-            <DialogueBox
-              speaker={currentNode.config.speaker}
-              characterSlug={currentNode.config.characterSlug}
-              text={currentNode.config.text || ""}
-              onAdvance={advanceNode}
-              isChoiceActive={false}
-            />
-          ) : null}
+          )}
         </div>
 
         {/* Settings Modal */}
@@ -679,6 +839,7 @@ export const StoryPlayer: React.FC<StoryPlayerProps> = ({
           onRestartEpisode={() => {
             setCurrentNodeId(nodes[0]?.nodeId || "");
             setIsEpisodeFinished(false);
+            setActiveEnding(null);
           }}
         />
       </div>

@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
 
     const result = await PaymentService.executeDevMockPurchase(user.id, pkg);
     if (!result.success) {
-      return NextResponse.json({ error: result.error }, { status: 400 });
+      return NextResponse.json({ error: "Purchase execution failed" }, { status: 400 });
     }
 
     return NextResponse.json({ success: true, newBalance: result.newBalance, package: pkg });

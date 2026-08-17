@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Crown, Heart, RotateCcw, Share2, Sparkles, Trophy, Home } from "lucide-react";
 import confetti from "canvas-confetti";
 import Link from "next/link";
+import { useI18n } from "@/lib/i18n/context";
 
 interface EndingScreenProps {
   storyTitle: string;
@@ -35,6 +36,8 @@ export const EndingScreen: React.FC<EndingScreenProps> = ({
   onReplay,
   onRestartStory,
 }) => {
+  const { t, locale } = useI18n();
+
   useEffect(() => {
     // Launch festive confetti celebration
     try {
@@ -48,7 +51,11 @@ export const EndingScreen: React.FC<EndingScreenProps> = ({
   }, []);
 
   const handleShare = async () => {
-    const shareText = `I unlocked the "${endingTitle}" ending in "${storyTitle}" on PLOT! What's your story?`;
+    const shareText =
+      locale === "id"
+        ? `Aku berhasil membuka ending "${endingTitle}" di cerita "${storyTitle}" di PLOT!`
+        : `I unlocked the "${endingTitle}" ending in "${storyTitle}" on PLOT! What's your story?`;
+
     if (typeof navigator !== "undefined" && navigator.share) {
       try {
         await navigator.share({
@@ -61,7 +68,7 @@ export const EndingScreen: React.FC<EndingScreenProps> = ({
       navigator.clipboard.writeText(
         `${shareText} ${window.location.origin}/story/${storySlug}`
       );
-      alert("Link copied to clipboard!");
+      alert(t("endingCopied"));
     }
   };
 
@@ -107,38 +114,35 @@ export const EndingScreen: React.FC<EndingScreenProps> = ({
           <div className="flex items-center justify-between mb-3 border-b border-white/10 pb-2">
             <span className="text-xs uppercase font-bold text-zinc-400 tracking-wider flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-              Final Story Stats
+              {t("endingSummary")}
             </span>
             <span className="text-xs text-zinc-400">
-              {unlockedEndingsCount}/{totalEndingsCount} Endings Unlocked
+              {unlockedEndingsCount}/{totalEndingsCount} {t("endings")}
             </span>
           </div>
 
           <div className="grid grid-cols-2 gap-3 text-xs">
-            <div className="flex justify-between items-center p-2 rounded-xl bg-zinc-800/40 border border-white/5">
-              <span className="text-zinc-400">Adrian Love</span>
-              <span className="font-bold text-rose-400">
-                {relationships.adrian?.love ?? 0}%
-              </span>
-            </div>
-            <div className="flex justify-between items-center p-2 rounded-xl bg-zinc-800/40 border border-white/5">
-              <span className="text-zinc-400">Adrian Trust</span>
-              <span className="font-bold text-sky-400">
-                {relationships.adrian?.trust ?? 0}%
-              </span>
-            </div>
-            <div className="flex justify-between items-center p-2 rounded-xl bg-zinc-800/40 border border-white/5">
-              <span className="text-zinc-400">Reputation</span>
-              <span className="font-bold text-amber-400">
-                {stats.REPUTATION ?? 50}%
-              </span>
-            </div>
-            <div className="flex justify-between items-center p-2 rounded-xl bg-zinc-800/40 border border-white/5">
-              <span className="text-zinc-400">Revenge</span>
-              <span className="font-bold text-purple-400">
-                {stats.REVENGE ?? 50}%
-              </span>
-            </div>
+            {Object.entries(relationships).map(([charSlug, rel]) => (
+              <React.Fragment key={charSlug}>
+                <div className="flex justify-between items-center p-2 rounded-xl bg-zinc-800/40 border border-white/5">
+                  <span className="text-zinc-400 capitalize">{charSlug} Love</span>
+                  <span className="font-bold text-rose-400">{rel.love}%</span>
+                </div>
+                <div className="flex justify-between items-center p-2 rounded-xl bg-zinc-800/40 border border-white/5">
+                  <span className="text-zinc-400 capitalize">{charSlug} Trust</span>
+                  <span className="font-bold text-sky-400">{rel.trust}%</span>
+                </div>
+              </React.Fragment>
+            ))}
+            {Object.entries(stats).map(([statKey, val]) => (
+              <div
+                key={statKey}
+                className="flex justify-between items-center p-2 rounded-xl bg-zinc-800/40 border border-white/5"
+              >
+                <span className="text-zinc-400 uppercase">{statKey}</span>
+                <span className="font-bold text-amber-400">{val}%</span>
+              </div>
+            ))}
           </div>
         </div>
 
@@ -149,7 +153,7 @@ export const EndingScreen: React.FC<EndingScreenProps> = ({
             className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-500 hover:to-amber-500 font-bold text-white shadow-lg shadow-rose-900/30 flex items-center justify-center gap-2 text-sm transition-all"
           >
             <Share2 className="w-4 h-4" />
-            Share Your Ending
+            {t("shareEnding")}
           </button>
 
           <div className="grid grid-cols-2 gap-2">
@@ -158,7 +162,7 @@ export const EndingScreen: React.FC<EndingScreenProps> = ({
               className="py-3 px-3 rounded-2xl bg-zinc-800 hover:bg-zinc-700 font-medium text-zinc-200 border border-white/10 flex items-center justify-center gap-1.5 text-xs transition-all"
             >
               <RotateCcw className="w-3.5 h-3.5" />
-              Replay Episode
+              {t("replayStory")}
             </button>
 
             <Link
@@ -166,7 +170,7 @@ export const EndingScreen: React.FC<EndingScreenProps> = ({
               className="py-3 px-3 rounded-2xl bg-zinc-800 hover:bg-zinc-700 font-medium text-zinc-200 border border-white/10 flex items-center justify-center gap-1.5 text-xs transition-all"
             >
               <Home className="w-3.5 h-3.5" />
-              Story Menu
+              {t("episodeGuide")}
             </Link>
           </div>
 
@@ -174,7 +178,9 @@ export const EndingScreen: React.FC<EndingScreenProps> = ({
             onClick={onRestartStory}
             className="text-[11px] text-zinc-500 hover:text-rose-400 underline underline-offset-2 mt-1 py-1"
           >
-            Restart Story to unlock other endings
+            {locale === "id"
+              ? "Ulangi cerita dari awal untuk membuka ending lainnya"
+              : "Restart Story to unlock other endings"}
           </button>
         </div>
       </motion.div>

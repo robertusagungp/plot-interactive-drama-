@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { ChevronDown, Sparkles } from "lucide-react";
 import { getCharacterColor } from "@/lib/art-assets";
+import { useI18n } from "@/lib/i18n/context";
 
 interface DialogueBoxProps {
   speaker?: string;
@@ -24,6 +25,7 @@ export const DialogueBox: React.FC<DialogueBoxProps> = ({
   onAdvance,
   isChoiceActive,
 }) => {
+  const { t } = useI18n();
   const [displayedText, setDisplayedText] = useState("");
   const [isTyping, setIsTyping] = useState(true);
 
@@ -148,7 +150,7 @@ export const DialogueBox: React.FC<DialogueBoxProps> = ({
         {/* Tap indicator */}
         <div className="flex items-center justify-between mt-2 pt-1 border-t border-white/5">
           <span className="text-[10px] text-zinc-500 font-mono tracking-wider uppercase">
-            {isTyping ? "Tap to skip" : "Tap to continue"}
+            {isTyping ? "..." : t("tapToContinue")}
           </span>
           <motion.div
             animate={{ y: [0, 4, 0] }}

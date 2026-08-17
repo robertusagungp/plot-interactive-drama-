@@ -4,9 +4,11 @@ import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, Compass, BookOpen, User } from "lucide-react";
+import { useI18n } from "@/lib/i18n/context";
 
 export const MobileNav: React.FC = () => {
   const pathname = usePathname();
+  const { t } = useI18n();
 
   // Hide mobile bottom nav during immersive story playback
   if (pathname.includes("/episode/")) {
@@ -14,10 +16,10 @@ export const MobileNav: React.FC = () => {
   }
 
   const navItems = [
-    { label: "Home", href: "/", icon: Home },
-    { label: "Discover", href: "/discover", icon: Compass },
-    { label: "Library", href: "/library", icon: BookOpen },
-    { label: "Profile", href: "/profile", icon: User },
+    { label: t("navHome"), href: "/", icon: Home },
+    { label: t("navDiscover"), href: "/discover", icon: Compass },
+    { label: t("navLibrary"), href: "/library", icon: BookOpen },
+    { label: t("navProfile"), href: "/profile", icon: User },
   ];
 
   return (

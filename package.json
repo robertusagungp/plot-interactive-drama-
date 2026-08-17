@@ -7,8 +7,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "postinstall": "prisma generate",
     "db:push": "prisma db push",
     "db:seed": "prisma db seed",
+    "validate:stories": "tsx src/scripts/validate-stories.ts",
     "test": "tsx --test src/__tests__/*.test.ts"
   },
   "prisma": {
