@@ -505,31 +505,19 @@ async function main() {
         });
       }
 
-      // Upsert all story nodes for this episode
-      for (const node of nodesToCreate) {
-        await prisma.storyNode.upsert({
-          where: {
-            episodeId_nodeId: {
-              episodeId: episode.id,
-              nodeId: node.nodeId,
-            },
-          },
-          update: {
-            nodeIndex: node.nodeIndex,
-            type: node.type,
-            configJson: JSON.stringify(node.config),
-            nextNodeId: node.nextNodeId,
-          },
-          create: {
-            episodeId: episode.id,
-            nodeId: node.nodeId,
-            nodeIndex: node.nodeIndex,
-            type: node.type,
-            configJson: JSON.stringify(node.config),
-            nextNodeId: node.nextNodeId,
-          },
-        });
-      }
+      // Fast bulk batch insertion for high-speed cloud database seeding
+      await prisma.storyNode.deleteMany({ where: { episodeId: episode.id } });
+      await prisma.storyNode.createMany({
+        data: nodesToCreate.map((node) => ({
+          episodeId: episode.id,
+          nodeId: node.nodeId,
+          nodeIndex: node.nodeIndex,
+          type: node.type,
+          configJson: JSON.stringify(node.config),
+          nextNodeId: node.nextNodeId,
+        })),
+        skipDuplicates: true,
+      });
     }
   }
 

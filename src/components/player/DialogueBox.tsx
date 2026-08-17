@@ -28,6 +28,7 @@ export const DialogueBox: React.FC<DialogueBoxProps> = ({
   const { t } = useI18n();
   const [displayedText, setDisplayedText] = useState("");
   const [isTyping, setIsTyping] = useState(true);
+  const safeText = text || "";
 
   // Typewriter effect with instant completion on second tap
   useEffect(() => {
@@ -38,8 +39,8 @@ export const DialogueBox: React.FC<DialogueBoxProps> = ({
 
     const interval = setInterval(() => {
       index++;
-      if (index <= text.length) {
-        setDisplayedText(text.slice(0, index));
+      if (index <= safeText.length) {
+        setDisplayedText(safeText.slice(0, index));
       } else {
         setIsTyping(false);
         clearInterval(interval);
@@ -47,7 +48,7 @@ export const DialogueBox: React.FC<DialogueBoxProps> = ({
     }, speed);
 
     return () => clearInterval(interval);
-  }, [text]);
+  }, [safeText]);
 
   const handleBoxClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -55,7 +56,7 @@ export const DialogueBox: React.FC<DialogueBoxProps> = ({
 
     if (isTyping) {
       // Fast forward to complete sentence
-      setDisplayedText(text);
+      setDisplayedText(safeText);
       setIsTyping(false);
     } else {
       onAdvance();

@@ -142,6 +142,30 @@ export const StoryPlayer: React.FC<StoryPlayerProps> = ({
     []
   );
 
+  // Auto-execute and advance non-interactive nodes
+  useEffect(() => {
+    if (currentNode) {
+      executeNode(currentNode);
+
+      const autoAdvanceTypes = [
+        "SCENE_CHANGE",
+        "MUSIC_CHANGE",
+        "SFX",
+        "STAT_CHANGE",
+        "RELATIONSHIP_CHANGE",
+        "DELAY",
+        "JUMP",
+      ];
+      if (autoAdvanceTypes.includes(currentNode.type) && currentNode.nextNodeId) {
+        const delay = currentNode.type === "DELAY" ? (currentNode.config?.duration || 1000) : 50;
+        const timer = setTimeout(() => {
+          setCurrentNodeId(currentNode.nextNodeId!);
+        }, delay);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [currentNodeId, currentNode]);
+
   // Execute Node Side-Effects on node transition
   const executeNode = useCallback(
     (node: StoryNodeData) => {
@@ -595,6 +619,26 @@ export const StoryPlayer: React.FC<StoryPlayerProps> = ({
           router.push(`/story/${storySlug}`);
         }}
       />
+    );
+  }
+
+  if (!nodes || nodes.length === 0 || !currentNode) {
+    return (
+      <div className="relative w-full h-full min-h-screen bg-black flex items-center justify-center p-4">
+        <div className="max-w-md w-full p-6 rounded-3xl bg-zinc-900 border border-white/10 text-center flex flex-col items-center gap-4">
+          <Sparkles className="w-10 h-10 text-rose-400 animate-pulse" />
+          <h3 className="text-lg font-black text-white">Episode Siap Dimainkan</h3>
+          <p className="text-xs text-zinc-400">
+            Sedang menyiapkan adegan cerita dan karakter.
+          </p>
+          <Link
+            href={`/story/${storySlug}`}
+            className="px-5 py-2.5 rounded-xl bg-rose-600 font-bold text-white text-xs"
+          >
+            {t("episodeGuide")}
+          </Link>
+        </div>
+      </div>
     );
   }
 
