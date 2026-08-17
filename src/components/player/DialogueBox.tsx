@@ -69,7 +69,7 @@ export const DialogueBox: React.FC<DialogueBoxProps> = ({
     return (
       <div
         onClick={handleBoxClick}
-        className="w-full max-w-lg mx-auto px-4 pb-6 pt-2 select-none cursor-pointer z-30"
+        className="w-full max-w-lg mx-auto px-3 sm:px-4 pb-4 sm:pb-6 pb-safe select-none cursor-pointer z-30"
       >
         <motion.div
           initial={{ opacity: 0, y: 12 }}
@@ -119,7 +119,7 @@ export const DialogueBox: React.FC<DialogueBoxProps> = ({
   return (
     <div
       onClick={handleBoxClick}
-      className="w-full max-w-lg mx-auto px-4 pb-6 pt-2 select-none cursor-pointer z-30"
+      className="w-full max-w-lg mx-auto px-3 sm:px-4 pb-4 sm:pb-6 pb-safe select-none cursor-pointer z-30"
     >
       <motion.div
         key={text}

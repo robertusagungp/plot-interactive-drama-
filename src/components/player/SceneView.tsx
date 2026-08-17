@@ -44,16 +44,14 @@ export const SceneView: React.FC<SceneViewProps> = ({
         animate={getMotionVariant(backgroundEffect)}
         className="absolute inset-0 w-full h-full bg-cover bg-center pointer-events-none"
         style={{
-          backgroundImage: backgroundUrl
-            ? `url(${backgroundUrl})`
-            : undefined,
+          backgroundImage: backgroundUrl ? `url(${backgroundUrl})` : undefined,
         }}
       >
         {!backgroundUrl && (
           <div className={`w-full h-full bg-gradient-to-b ${bgData.gradient} relative overflow-hidden`}>
-            {/* Ambient visual elements based on scene type */}
+            {/* Ambient Cityline SVG */}
             {bgData.svgElements === "cityline" && (
-              <div className="absolute inset-x-0 bottom-0 h-2/3 opacity-30 pointer-events-none">
+              <div className="absolute inset-x-0 bottom-0 h-2/3 opacity-35 pointer-events-none">
                 <svg viewBox="0 0 1000 500" className="w-full h-full object-cover fill-current text-sky-950">
                   <rect x="50" y="180" width="90" height="320" rx="4" fill="#0B132B" />
                   <rect x="160" y="80" width="120" height="420" rx="4" fill="#0D1B2A" />
@@ -66,28 +64,77 @@ export const SceneView: React.FC<SceneViewProps> = ({
                   {Array.from({ length: 45 }).map((_, i) => (
                     <circle
                       key={i}
-                      cx={100 + (i * 22) % 780}
+                      cx={100 + ((i * 22) % 780)}
                       cy={150 + ((i * 37) % 280)}
                       r="2"
                       fill={i % 3 === 0 ? "#38BDF8" : "#FBBF24"}
-                      opacity={0.7}
+                      opacity={0.8}
                     />
                   ))}
                 </svg>
               </div>
             )}
 
+            {/* Ambient Rain Animation */}
             {bgData.svgElements === "rain" && (
-              <div className="absolute inset-0 opacity-25 pointer-events-none">
-                <div className="absolute inset-0 bg-[radial-gradient(#38bdf8_1px,transparent_1px)] [background-size:16px_32px] animate-pulse" />
+              <div className="absolute inset-0 opacity-30 pointer-events-none overflow-hidden">
+                <div className="absolute inset-0 bg-[radial-gradient(#38bdf8_1.5px,transparent_1.5px)] [background-size:20px_36px] animate-pulse" />
+                {Array.from({ length: 12 }).map((_, i) => (
+                  <motion.div
+                    key={i}
+                    className="absolute w-[1.5px] bg-gradient-to-b from-transparent via-cyan-400 to-transparent"
+                    style={{
+                      height: `${40 + (i % 5) * 20}px`,
+                      left: `${(i * 9) % 100}%`,
+                      top: "-40px",
+                    }}
+                    animate={{
+                      y: ["0vh", "110vh"],
+                      opacity: [0, 0.7, 0],
+                    }}
+                    transition={{
+                      repeat: Infinity,
+                      duration: 0.8 + (i % 4) * 0.2,
+                      delay: (i * 0.1) % 0.8,
+                      ease: "linear",
+                    }}
+                  />
+                ))}
               </div>
             )}
 
+            {/* Ambient Chandelier & Sparkle Rays */}
             {bgData.svgElements === "chandelier" && (
-              <div className="absolute top-0 inset-x-0 flex justify-center opacity-40">
-                <div className="w-72 h-36 bg-amber-400/20 blur-3xl rounded-full" />
+              <div className="absolute top-0 inset-x-0 flex justify-center opacity-50 pointer-events-none">
+                <div className="w-80 h-44 bg-amber-400/25 blur-3xl rounded-full" />
+                <div className="absolute top-2 w-48 h-32 bg-rose-400/15 blur-2xl rounded-full" />
               </div>
             )}
+
+            {/* Floating Sparkle Ambient Particles for all scenes */}
+            <div className="absolute inset-0 pointer-events-none overflow-hidden">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <motion.div
+                  key={i}
+                  className="absolute w-1.5 h-1.5 rounded-full bg-rose-400/60 shadow-[0_0_10px_#f43f5e]"
+                  style={{
+                    left: `${15 + (i * 12) % 75}%`,
+                    top: `${20 + (i * 15) % 65}%`,
+                  }}
+                  animate={{
+                    y: [0, -25, 0],
+                    opacity: [0.2, 0.85, 0.2],
+                    scale: [0.8, 1.3, 0.8],
+                  }}
+                  transition={{
+                    repeat: Infinity,
+                    duration: 3 + (i % 3),
+                    delay: (i * 0.4) % 2,
+                    ease: "easeInOut",
+                  }}
+                />
+              ))}
+            </div>
 
             {/* Depth Overlay */}
             <div
@@ -98,7 +145,7 @@ export const SceneView: React.FC<SceneViewProps> = ({
         )}
 
         {/* Cinematic Vignette */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/60 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/25 to-black/60 pointer-events-none" />
       </motion.div>
 
       {/* Screen Effects Overlay (Flash / Shake) */}

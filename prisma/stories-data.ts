@@ -98,7 +98,7 @@ export interface StoryDefinition {
   }[];
 }
 
-// 20 ALL NEW COMPLETE INTERACTIVE DRAMAS WITH 16 BESPOKE UNIQUE EPISODES EACH
+// 21 COMPLETE INTERACTIVE DRAMAS WITH 16 BESPOKE UNIQUE EPISODES EACH
 const BESPOKE_STORIES_CONFIG: Array<{
   slug: string;
   titleEn: string;
@@ -125,7 +125,46 @@ const BESPOKE_STORIES_CONFIG: Array<{
     synopsisId: string;
   }>;
 }> = [
-  // 1
+  // Flagship 1: I Married My Enemy
+  {
+    slug: "i-married-my-enemy",
+    titleEn: "I Married My Enemy",
+    titleId: "Aku Menikahi Musuhku",
+    descEn: "To save her family company from bankruptcy, Sarah Wijaya signs a one-year marriage contract with her ruthless corporate rival, Adrian Hartono.",
+    descId: "Demi menyelamatkan perusahaan keluarga dari kebangkrutan, Sarah Wijaya terpaksa menandatangani kontrak pernikahan satu tahun dengan musuh bebuyutannya, Adrian Hartono.",
+    heroEn: "Adrian Hartono",
+    heroId: "Adrian Hartono",
+    heroSlug: "adrian",
+    heroBioEn: "CEO of Hartono Corp. Ruthless in business, intensely private, and fiercely protective.",
+    heroBioId: "CEO Hartono Corp. Dingin dan tanpa ampun dalam bisnis, namun sangat protektif.",
+    rivalEn: "Vanessa Lim",
+    rivalId: "Vanessa Lim",
+    rivalSlug: "vanessa",
+    rivalBioEn: "An elite socialite determined to tear their marriage contract apart.",
+    rivalBioId: "Sosialita kaya yang bertekad membongkar rahasia pernikahan kontrak mereka.",
+    genres: ["Romance", "Drama", "Enemies to Lovers"],
+    tags: ["Contract Marriage", "Billionaire Rival", "Enemies to Lovers"],
+    featured: true,
+    episodes: [
+      { titleEn: "The Billionaire's Contract", titleId: "Kontrak Sang Miliarder", synopsisEn: "A desperate proposition to save Wijaya Holdings.", synopsisId: "Tawaran pernikahan demi menyelamatkan Wijaya Holdings." },
+      { titleEn: "The Stolen Gaze", titleId: "Tatapan yang Dicuri", synopsisEn: "Moving into Adrian's luxurious penthouse suite.", synopsisId: "Pindah ke penthouse mewah Adrian di puncak kota." },
+      { titleEn: "The Penthouse Prison", titleId: "Sangkar Emas Penthouse", synopsisEn: "Setting strict boundaries under the same roof.", synopsisId: "Menetapkan batasan tegas tinggal di bawah satu atap." },
+      { titleEn: "Whispers in the Boardroom", titleId: "Bisikan di Ruang Direksi", synopsisEn: "Rumors spread among high-stakes shareholders.", synopsisId: "Desas-desus menyebar di kalangan dewan komisaris." },
+      { titleEn: "The Gala Ambush", titleId: "Jebakan Jamuan Mewah", synopsisEn: "Facing the cameras together at the charity ball.", synopsisId: "Menghadapi sorotan wartawan di pesta amal megah." },
+      { titleEn: "Rain in the Glass Tower", titleId: "Hujan di Menara Kaca", synopsisEn: "A moment of shared vulnerability in the storm.", synopsisId: "Momen kejujuran di tengah badai malam." },
+      { titleEn: "A Taste of Danger", titleId: "Cita Rasa Bahaya", synopsisEn: "Vanessa uncovers a draft of the agreement.", synopsisId: "Vanessa menemukan draf perjanjian rahasia." },
+      { titleEn: "Secrets of the Hartono Empire", titleId: "Rahasia Dinasti Hartono", synopsisEn: "Discovering what Adrian sacrificed for the deal.", synopsisId: "Mengetahui pengorbanan Adrian di masa lalu." },
+      { titleEn: "The Staged Kiss", titleId: "Ciuman Rekayasa", synopsisEn: "A kiss in front of cameras that feels all too real.", synopsisId: "Ciuman di depan kamera yang terasa sangat nyata." },
+      { titleEn: "The Rival's Counterattack", titleId: "Serangan Balik Sang Musuh", synopsisEn: "A smear campaign launched against Wijaya assets.", synopsisId: "Serangan fitnah diluncurkan ke aset Wijaya." },
+      { titleEn: "Behind Closed Doors", titleId: "Di Balik Pintu Tertutup", synopsisEn: "Admitting the depth of growing feelings.", synopsisId: "Mengakui tumbuhnya rasa cinta di hati." },
+      { titleEn: "Heart Over Ambition", titleId: "Hati Melampaui Ambisi", synopsisEn: "Choosing love over corporate leverage.", synopsisId: "Memilih cinta di atas ambisi bisnis." },
+      { titleEn: "Hostile Takeover Defense", titleId: "Pertahanan Saham Terakhir", synopsisEn: "Outsmarting the board with a joint merger.", synopsisId: "Menggagalkan kudeta direksi dengan merger bersama." },
+      { titleEn: "The Unmasking", titleId: "Membuka Kedok Pengkhianat", synopsisEn: "Vanessa's conspiracy is publicly exposed.", synopsisId: "Konspirasi jahat Vanessa terbongkar." },
+      { titleEn: "The Real Vows", titleId: "Janji Suci yang Sesungguhnya", synopsisEn: "Burning the old contract to marry for love.", synopsisId: "Membakar kontrak lama dan menikah demi cinta." },
+      { titleEn: "Everlasting Empire", titleId: "Kerajaan Cinta Abadi", synopsisEn: "From bitter enemies to partners for eternity.", synopsisId: "Dari musuh bebuyutan menjadi cinta abadi selamanya." },
+    ],
+  },
+  // 2
   {
     slug: "i-woke-up-married-to-koreas-coldest-idol",
     titleEn: "I Woke Up Married to Korea's Coldest Idol",

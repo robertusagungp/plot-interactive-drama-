@@ -669,9 +669,9 @@ export const StoryPlayer: React.FC<StoryPlayerProps> = ({
   }));
 
   return (
-    <div className="relative w-full h-full min-h-screen bg-black flex items-center justify-center overflow-hidden">
+    <div className="fixed inset-0 w-full h-[100dvh] bg-black flex items-center justify-center overflow-hidden touch-manipulation select-none">
       {/* Constrained Cinematic Vertical Container on Desktop */}
-      <div className="relative w-full h-full md:h-[92vh] md:max-w-[420px] md:rounded-[36px] overflow-hidden shadow-[0_0_80px_rgba(0,0,0,0.9)] md:border md:border-white/15 flex flex-col justify-between bg-slate-950">
+      <div className="relative w-full h-full md:h-[92vh] md:max-w-[430px] md:rounded-[36px] overflow-hidden shadow-[0_0_80px_rgba(0,0,0,0.9)] md:border md:border-white/15 flex flex-col justify-between bg-slate-950">
         {/* Floating Stat & Relationship Toasts */}
         <StatToast notifications={notifications} />
 
