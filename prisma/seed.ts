@@ -183,8 +183,8 @@ async function seedSingleDrama(sDef: any, sIdx: number, total: number, genreMap:
         nodeIndex: 1,
         type: "NARRATION",
         config: {
-          text: `Seoul. The tension builds in episode ${ep.number} of ${sDef.title}.`,
-          textId: `Seoul. Ketegangan semakin memuncak di episode ${ep.number} dari ${sDef.titleId}.`,
+          text: `${ep.title}. ${ep.synopsis}`,
+          textId: `${ep.titleId}. ${ep.synopsisId}`,
           style: "standard",
         },
         nextNodeId: `ep${ep.number}_d1`,
