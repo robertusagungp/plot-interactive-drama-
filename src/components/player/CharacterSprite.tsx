@@ -100,30 +100,29 @@ export const CharacterSprite: React.FC<CharacterSpriteProps> = ({
   return (
     <motion.div
       animate={{
-        scale: isSpeaking ? 1.03 : 0.97,
+        scale: isSpeaking ? 1.03 : 0.98,
         y: isSpeaking ? [0, -5, 0] : [0, -1.5, 0],
-        filter: isSpeaking ? "brightness(1.08)" : "brightness(0.82)",
-        opacity: isSpeaking ? 1 : 0.88,
+        filter: isSpeaking ? "brightness(1.08)" : "brightness(0.85)",
       }}
       transition={{
         duration: isSpeaking ? 0.45 : 3.5,
         repeat: Infinity,
         ease: "easeInOut",
       }}
-      className={`relative flex flex-col items-center justify-end w-full h-full select-none pointer-events-none ${className}`}
+      className={`relative flex flex-col items-center justify-end w-full h-full select-none pointer-events-none opacity-100 ${className}`}
+      style={{ opacity: 1 }}
       data-character-slug={slug}
       data-expression={expression}
       data-speaking={isSpeaking}
     >
       {/* 1. Active Speaker / Activity Floating Badge */}
-      <div className="absolute -top-3 z-30 flex flex-col items-center gap-1">
+      <div className="absolute top-2 sm:top-4 z-30 flex flex-col items-center gap-1 pointer-events-none">
         {/* Active Speaking Indicator */}
         {isSpeaking && (
           <motion.div
-            initial={{ opacity: 0, y: 8, scale: 0.85 }}
+            initial={{ opacity: 1, y: 0, scale: 1 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -4 }}
-            className="px-3 py-1 rounded-full bg-black/90 backdrop-blur-md border border-rose-500/50 shadow-[0_0_18px_rgba(244,63,94,0.45)] flex items-center gap-2"
+            className="px-3.5 py-1 rounded-full bg-black/95 backdrop-blur-md border border-rose-500/60 shadow-[0_0_20px_rgba(244,63,94,0.55)] flex items-center gap-2"
           >
             {/* Live Audio Equalizer Waves */}
             <div className="flex items-center gap-0.5 h-3">
@@ -152,22 +151,21 @@ export const CharacterSprite: React.FC<CharacterSpriteProps> = ({
         {/* Dynamic Activity / Action Indicator Badge */}
         {(activity || activityText) && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
+            initial={{ opacity: 1, scale: 1 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.3 }}
-            className="px-2.5 py-0.5 rounded-full bg-zinc-950/90 backdrop-blur-md border border-white/20 shadow-lg flex items-center gap-1.5"
+            className="px-3 py-1 rounded-full bg-zinc-950/95 backdrop-blur-md border border-amber-500/40 shadow-lg flex items-center gap-1.5"
           >
             {getActivityIcon(activity)}
-            <span className="text-[10px] font-semibold text-zinc-200">
+            <span className="text-[11px] font-bold text-amber-300">
               {activityText || activity?.replace(/_/g, " ")}
             </span>
           </motion.div>
         )}
       </div>
 
-      {/* 2. Reaction Atmospheric Particles (Hearts / Sparks / Tears / Gleams) */}
+      {/* 2. Reaction Atmospheric Particles */}
       {(reactionFx === "hearts" || expression === "happy" || expression === "embarrassed") && (
-        <div className="absolute inset-0 pointer-events-none overflow-visible">
+        <div className="absolute inset-0 pointer-events-none overflow-visible z-30">
           {[0, 1, 2].map((i) => (
             <motion.div
               key={i}
@@ -188,14 +186,14 @@ export const CharacterSprite: React.FC<CharacterSpriteProps> = ({
                 ease: "easeOut",
               }}
             >
-              <Heart className="w-4 h-4 fill-current drop-shadow-[0_0_8px_#f43f5e]" />
+              <Heart className="w-5 h-5 fill-current drop-shadow-[0_0_10px_#f43f5e]" />
             </motion.div>
           ))}
         </div>
       )}
 
       {(reactionFx === "sparks" || expression === "angry") && (
-        <div className="absolute inset-0 pointer-events-none overflow-visible">
+        <div className="absolute inset-0 pointer-events-none overflow-visible z-30">
           {[0, 1].map((i) => (
             <motion.div
               key={i}
@@ -222,7 +220,7 @@ export const CharacterSprite: React.FC<CharacterSpriteProps> = ({
       )}
 
       {(reactionFx === "gleam" || expression === "smirk") && (
-        <div className="absolute inset-0 pointer-events-none overflow-visible">
+        <div className="absolute inset-0 pointer-events-none overflow-visible z-30">
           {[0, 1, 2].map((i) => (
             <motion.div
               key={i}
@@ -250,7 +248,7 @@ export const CharacterSprite: React.FC<CharacterSpriteProps> = ({
       )}
 
       {reactionFx === "notes" && (
-        <div className="absolute inset-0 pointer-events-none overflow-visible">
+        <div className="absolute inset-0 pointer-events-none overflow-visible z-30">
           {[0, 1, 2].map((i) => (
             <motion.div
               key={i}
@@ -281,7 +279,8 @@ export const CharacterSprite: React.FC<CharacterSpriteProps> = ({
       {/* 3. Character SVG Vector Body with Dynamic Expressions & Mouth Animation */}
       <svg
         viewBox="0 0 400 650"
-        className="h-full max-h-[85vh] w-auto drop-shadow-[0_25px_45px_rgba(0,0,0,0.95)] transition-all duration-300"
+        className="w-full h-full max-h-[80vh] object-contain drop-shadow-[0_25px_45px_rgba(0,0,0,0.95)] transition-all duration-300 pointer-events-none"
+        style={{ aspectRatio: "400/650", minHeight: "340px", width: "100%", height: "100%" }}
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >
@@ -478,29 +477,48 @@ export const CharacterSprite: React.FC<CharacterSpriteProps> = ({
         ) : expression === "happy" ? (
           <path d="M 185 285 Q 200 305 215 285 Q 200 292 185 285" fill="#E11D48" stroke="#881337" strokeWidth="1.5" />
         ) : expression === "smirk" ? (
-          <path d="M 188 288 Q 200 286 218 280" stroke="#881337" strokeWidth="3" strokeLinecap="round" />
-        ) : expression === "shocked" ? (
-          <ellipse cx="200" cy="292" rx="9" ry="12" fill="#881337" stroke="#4C0519" strokeWidth="2" />
+          <path d="M 188 286 Q 200 290 215 280" stroke="#881337" strokeWidth="2.5" strokeLinecap="round" fill="none" />
         ) : expression === "angry" || expression === "determined" ? (
-          <path d="M 186 290 L 214 290" stroke="#881337" strokeWidth="3" strokeLinecap="round" />
+          <path d="M 188 290 Q 200 284 212 290" stroke="#881337" strokeWidth="2.5" strokeLinecap="round" fill="none" />
         ) : expression === "sad" || expression === "crying" ? (
-          <path d="M 188 293 Q 200 286 212 293" stroke="#881337" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+          <path d="M 190 292 Q 200 286 210 292" stroke="#881337" strokeWidth="2" strokeLinecap="round" fill="none" />
+        ) : expression === "shocked" ? (
+          <ellipse cx="200" cy="290" rx="6" ry="8" fill="#4C0519" stroke="#881337" strokeWidth="1.5" />
         ) : (
-          <path d="M 190 288 Q 200 292 210 288" stroke="#881337" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+          <path d="M 190 287 Q 200 292 210 287" stroke="#881337" strokeWidth="2" strokeLinecap="round" fill="none" />
         )}
 
-        {/* HAIR - Top / Front Layer */}
+        {/* Front Hair Style */}
         {isFemale ? (
-          <path
-            d="M 130 200 C 130 110 270 110 270 200 C 270 215 250 200 240 180 C 220 160 180 160 160 180 C 150 200 130 215 130 200 Z"
-            fill={`url(#hair-grad-${slug})`}
-          />
+          <>
+            {/* Female Stylish Hair */}
+            <path
+              d="M 130 220 C 130 110 270 110 270 220 C 265 170 240 150 200 150 C 160 150 135 170 130 220 Z"
+              fill={`url(#hair-grad-${slug})`}
+            />
+            {/* Bangs & Framing Strands */}
+            <path
+              d="M 140 180 Q 165 240 155 270 C 160 220 180 180 200 175 C 220 180 240 220 245 270 Q 235 240 260 180 Z"
+              fill={`url(#hair-grad-${slug})`}
+            />
+          </>
         ) : (
-          <path
-            d="M 130 210 C 130 120 270 110 270 210 C 265 190 250 160 220 155 C 190 150 160 170 130 210 Z"
-            fill={`url(#hair-grad-${slug})`}
-          />
+          <>
+            {/* Male K-Drama Layered Hair */}
+            <path
+              d="M 130 210 C 130 120 270 120 270 210 C 260 160 240 145 200 145 C 160 145 140 160 130 210 Z"
+              fill={`url(#hair-grad-${slug})`}
+            />
+            {/* Bangs */}
+            <path
+              d="M 135 190 Q 160 225 180 200 Q 200 230 220 195 Q 245 225 265 190 C 250 160 220 150 200 150 C 180 150 150 160 135 190 Z"
+              fill={`url(#hair-grad-${slug})`}
+            />
+          </>
         )}
+
+        {/* Hair Highlight Sheen */}
+        <ellipse cx="200" cy="165" rx="35" ry="8" fill="#FFFFFF" fillOpacity="0.25" />
       </svg>
     </motion.div>
   );

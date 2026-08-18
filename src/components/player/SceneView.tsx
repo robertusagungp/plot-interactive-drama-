@@ -27,9 +27,9 @@ export const SceneView: React.FC<SceneViewProps> = ({
   const bgData = SCENE_BACKGROUNDS[backgroundSlug] || SCENE_BACKGROUNDS.penthouse;
 
   // Split characters by position or fallback
-  const charList = Object.values(activeCharacters).filter((c) => c.isVisible);
+  const charList = Object.values(activeCharacters).filter((c) => c && c.isVisible !== false);
   const leftChars = charList.filter((c) => c.position === "left");
-  const centerChars = charList.filter((c) => c.position === "center");
+  const centerChars = charList.filter((c) => c.position === "center" || (!c.position && charList.length === 1));
   const rightChars = charList.filter((c) => c.position === "right");
 
   const effectiveBgImage = backgroundUrl || bgData.imageUrl;
@@ -39,9 +39,9 @@ export const SceneView: React.FC<SceneViewProps> = ({
       {/* 1. Cinematic Background Layer with Ken Burns Motion */}
       <motion.div
         key={backgroundSlug + (backgroundUrl || "")}
-        variants={getMotionVariant(backgroundEffect)}
-        initial="initial"
-        animate="animate"
+        variants={screenOverlayVariants}
+        initial="none"
+        animate={getMotionVariant(backgroundEffect)}
         className="absolute inset-0 w-full h-full overflow-hidden"
       >
         {effectiveBgImage ? (
@@ -57,8 +57,7 @@ export const SceneView: React.FC<SceneViewProps> = ({
           />
         ) : (
           <div
-            className="absolute inset-0 w-full h-full"
-            style={{ background: bgData.background }}
+            className={`absolute inset-0 w-full h-full bg-gradient-to-b ${bgData.gradient}`}
           />
         )}
 
@@ -157,25 +156,25 @@ export const SceneView: React.FC<SceneViewProps> = ({
       </AnimatePresence>
 
       {/* 2. Character Layering Stage (Prominent & High Viewport) */}
-      <div className="relative w-full h-[72vh] sm:h-[78vh] z-10 flex items-end justify-center px-1 pb-32 sm:pb-36 max-w-lg mx-auto pointer-events-none">
+      <div className="relative w-full h-[70vh] sm:h-[76vh] z-10 flex items-end justify-center px-2 pb-24 sm:pb-28 max-w-lg mx-auto pointer-events-none">
         {/* Single Character Mode (Centered & Dominant) */}
-        {charList.length === 1 ? (
-          <div className="relative w-4/5 sm:w-3/4 max-w-[340px] h-full flex items-end justify-center z-20">
+        {charList.length <= 1 ? (
+          <div className="relative w-full max-w-[340px] h-full flex items-end justify-center z-20">
             <AnimatePresence mode="popLayout">
               {charList.map((char) => (
                 <motion.div
                   key={char.slug}
                   variants={characterMotionVariants}
-                  initial="initial"
+                  initial="idle"
                   animate={getMotionVariant(char.animation)}
                   exit="fade-out"
-                  className="absolute bottom-0 w-full h-full flex items-end justify-center"
+                  className="w-full h-full flex items-end justify-center"
                 >
                   <CharacterSprite
                     slug={char.slug}
                     name={char.name}
                     expression={char.expression}
-                    position={char.position}
+                    position={char.position || "center"}
                     customAvatarUrl={char.avatarUrl}
                     isSpeaking={char.slug === activeSpeakerSlug || true}
                     activity={char.activity}
@@ -196,10 +195,10 @@ export const SceneView: React.FC<SceneViewProps> = ({
                   <motion.div
                     key={char.slug}
                     variants={characterMotionVariants}
-                    initial="enter-left"
+                    initial="idle"
                     animate={getMotionVariant(char.animation)}
                     exit="exit-left"
-                    className={`absolute bottom-0 w-full h-full flex items-end justify-center transition-all duration-300 ${
+                    className={`w-full h-full flex items-end justify-center transition-all duration-300 ${
                       char.slug === activeSpeakerSlug ? "z-20 scale-105" : "z-10 brightness-85 scale-95"
                     }`}
                   >
@@ -227,10 +226,10 @@ export const SceneView: React.FC<SceneViewProps> = ({
                     <motion.div
                       key={char.slug}
                       variants={characterMotionVariants}
-                      initial="initial"
+                      initial="idle"
                       animate={getMotionVariant(char.animation)}
                       exit="fade-out"
-                      className="absolute bottom-0 w-full h-full flex items-end justify-center"
+                      className="w-full h-full flex items-end justify-center"
                     >
                       <CharacterSprite
                         slug={char.slug}
@@ -256,10 +255,10 @@ export const SceneView: React.FC<SceneViewProps> = ({
                   <motion.div
                     key={char.slug}
                     variants={characterMotionVariants}
-                    initial="enter-right"
+                    initial="idle"
                     animate={getMotionVariant(char.animation)}
                     exit="exit-right"
-                    className={`absolute bottom-0 w-full h-full flex items-end justify-center transition-all duration-300 ${
+                    className={`w-full h-full flex items-end justify-center transition-all duration-300 ${
                       char.slug === activeSpeakerSlug ? "z-20 scale-105" : "z-10 brightness-85 scale-95"
                     }`}
                   >

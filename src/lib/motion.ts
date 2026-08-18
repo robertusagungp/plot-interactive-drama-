@@ -11,13 +11,13 @@ export const characterMotionVariants: Variants = {
     transition: { duration: 0.35, ease: "easeOut" },
   },
   "enter-left": {
-    opacity: [0, 1],
+    opacity: 1,
     x: [-60, 0],
     scale: [0.95, 1],
     transition: { duration: 0.45, ease: "easeOut" },
   },
   "enter-right": {
-    opacity: [0, 1],
+    opacity: 1,
     x: [60, 0],
     scale: [0.95, 1],
     transition: { duration: 0.45, ease: "easeOut" },
@@ -42,29 +42,34 @@ export const characterMotionVariants: Variants = {
     transition: { duration: 0.3, ease: "easeIn" },
   },
   shake: {
+    opacity: 1,
     x: [0, -12, 12, -8, 8, -4, 4, 0],
     transition: { duration: 0.5, ease: "easeInOut" },
   },
   "small-shake": {
+    opacity: 1,
     x: [0, -5, 5, -3, 3, 0],
     transition: { duration: 0.3, ease: "easeInOut" },
   },
   bounce: {
+    opacity: 1,
     y: [0, -18, 0, -8, 0],
     transition: { duration: 0.45, ease: "easeOut" },
   },
   pulse: {
-    scale: [1, 1.06, 0.98, 1],
-    transition: { duration: 0.4, ease: "easeInOut" },
+    opacity: 1,
+    scale: [1, 1.05, 0.98, 1],
+    y: [0, -4, 0],
+    transition: { duration: 0.45, ease: "easeInOut" },
   },
   "zoom-in": {
     scale: [0.85, 1.05, 1],
-    opacity: [0, 1, 1],
+    opacity: 1,
     transition: { duration: 0.45, ease: "easeOut" },
   },
   "zoom-out": {
     scale: [1.1, 0.98, 1],
-    opacity: [0, 1, 1],
+    opacity: 1,
     transition: { duration: 0.4, ease: "easeOut" },
   },
 };

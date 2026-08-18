@@ -45,6 +45,7 @@ export interface StoryDefinition {
     titleId: string;
     synopsis: string;
     synopsisId: string;
+    coverImage?: string;
     bgSlug: string;
     bgMusic: string;
     dialogues: {
@@ -56,6 +57,10 @@ export interface StoryDefinition {
       textEn: string;
       textId: string;
       sfx?: string;
+      activity?: string;
+      activityTextId?: string;
+      activityTextEn?: string;
+      reactionFx?: string;
     }[];
     choicePromptEn: string;
     choicePromptId: string;
@@ -65,7 +70,7 @@ export interface StoryDefinition {
       statKey?: string;
       statAmount?: number;
       relChar?: string;
-      relType?: "love" | "trust";
+      relType?: "love" | "trust" | string;
       relAmount?: number;
       replyEn: string;
       replyId: string;
@@ -78,7 +83,7 @@ export interface StoryDefinition {
       statKey?: string;
       statAmount?: number;
       relChar?: string;
-      relType?: "love" | "trust";
+      relType?: "love" | "trust" | string;
       relAmount?: number;
       replyEn: string;
       replyId: string;
@@ -92,6 +97,10 @@ export interface StoryDefinition {
       textEn: string;
       textId: string;
       sfx?: string;
+      activity?: string;
+      activityTextId?: string;
+      activityTextEn?: string;
+      reactionFx?: string;
     }[];
     cliffhangerEn: string;
     cliffhangerId: string;

@@ -14,6 +14,7 @@ export type CharacterExpression =
 
 export type MotionPreset =
   | "none"
+  | "idle"
   | "fade-in"
   | "fade-out"
   | "enter-left"

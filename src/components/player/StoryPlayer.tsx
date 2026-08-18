@@ -789,11 +789,30 @@ export const StoryPlayer: React.FC<StoryPlayerProps> = ({
                 expression: currentNode.config.expression || "normal",
                 position: currentNode.config.position || "center",
                 isVisible: true,
-                animation: "pulse",
+                animation: "idle",
                 activity: currentNode.config.activity,
                 activityTextId: currentNode.config.activityTextId,
                 activityTextEn: currentNode.config.activityTextEn,
                 reactionFx: currentNode.config.reactionFx || "none",
+              };
+            }
+
+            // If no characters currently set, look up the primary character in this episode
+            if (Object.keys(displayCharacters).length === 0) {
+              const firstDialogueNode = nodes.find((n) => n.type === "DIALOGUE" && n.config?.characterSlug);
+              const fallbackSlug = firstDialogueNode?.config?.characterSlug || "lead";
+              const fallbackName = firstDialogueNode?.config?.speaker || "Protagonist";
+              displayCharacters[fallbackSlug] = {
+                slug: fallbackSlug,
+                name: fallbackName,
+                expression: "normal",
+                position: "center",
+                isVisible: true,
+                animation: "idle",
+                activity: "examining_documents",
+                activityTextId: "Memperhatikan situasi adegan",
+                activityTextEn: "Observing the scene",
+                reactionFx: "none",
               };
             }
 
