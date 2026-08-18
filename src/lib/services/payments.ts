@@ -246,8 +246,9 @@ export async function approvePaymentOrder(params: {
 }) {
   const { orderId, adminUserId, note } = params;
 
-  return await db.$transaction(async (tx) => {
-    const order = await tx.paymentOrder.findFirst({
+  return await db.$transaction(
+    async (tx) => {
+      const order = await tx.paymentOrder.findFirst({
       where: { OR: [{ id: orderId }, { orderId }] },
       include: { package: true, walletTransaction: true },
     });
@@ -320,14 +321,16 @@ export async function approvePaymentOrder(params: {
       },
     });
 
-    return {
-      success: true,
-      order: updatedOrder,
-      creditedAmount: order.currencyAmount,
-      currencyType: order.currencyType,
-      newBalance,
-    };
-  });
+      return {
+        success: true,
+        order: updatedOrder,
+        creditedAmount: order.currencyAmount,
+        currencyType: order.currencyType,
+        newBalance,
+      };
+    },
+    { timeout: 20000, maxWait: 10000 }
+  );
 }
 
 /**
@@ -341,10 +344,11 @@ export async function rejectPaymentOrder(params: {
 }) {
   const { orderId, adminUserId, reason, note } = params;
 
-  return await db.$transaction(async (tx) => {
-    const order = await tx.paymentOrder.findFirst({
-      where: { OR: [{ id: orderId }, { orderId }] },
-    });
+  return await db.$transaction(
+    async (tx) => {
+      const order = await tx.paymentOrder.findFirst({
+        where: { OR: [{ id: orderId }, { orderId }] },
+      });
 
     if (!order) throw new Error("ORDER_NOT_FOUND");
     if (order.status === "APPROVED") throw new Error("CANNOT_REJECT_APPROVED_ORDER");
@@ -372,7 +376,9 @@ export async function rejectPaymentOrder(params: {
     });
 
     return updated;
-  });
+    },
+    { timeout: 20000, maxWait: 10000 }
+  );
 }
 
 // Aliases for compatibility
