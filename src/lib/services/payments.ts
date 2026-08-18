@@ -321,13 +321,47 @@ export async function approvePaymentOrder(params: {
       },
     });
 
-      return {
+      const result = {
         success: true,
         order: updatedOrder,
         creditedAmount: order.currencyAmount,
         currencyType: order.currencyType,
         newBalance,
       };
+
+      // Server-Side Authoritative Purchase Event to TikTok Events API (CAPI)
+      try {
+        const { sendTikTokServerEvent } = await import("@/lib/services/tiktok-events-api");
+        const { trackEvent } = await import("@/lib/services/analytics");
+
+        await trackEvent(
+          "purchase_completed",
+          {
+            orderId: order.orderId,
+            packageId: order.packageId,
+            priceIDR: order.priceIDR,
+            currencyType: order.currencyType,
+            currencyAmount: order.currencyAmount,
+            paymentMethod: order.paymentMethod,
+          },
+          order.userId
+        );
+
+        await sendTikTokServerEvent({
+          eventName: "Purchase",
+          eventId: `pur_${order.orderId}`,
+          userId: order.userId,
+          currency: "IDR",
+          value: order.priceIDR,
+          contentId: order.packageId,
+          contentType: "currency_package",
+          contentName: `${order.currencyAmount} ${order.currencyType}`,
+        });
+      } catch (e) {
+        console.error("[TikTok Purchase Event Dispatch Error]", e);
+      }
+
+      return result;
     },
     { timeout: 20000, maxWait: 10000 }
   );

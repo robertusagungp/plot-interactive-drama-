@@ -24,6 +24,7 @@ import {
   PackageDefinition,
 } from "@/lib/services/payments";
 import { useI18n } from "@/lib/i18n/context";
+import { trackAppEvent } from "@/lib/analytics/tracker";
 
 interface PaymentOrderData {
   id: string;
@@ -92,6 +93,13 @@ export const TopupClient: React.FC = () => {
       if (data.success) {
         setActiveOrder(data.order);
         setOrders((prev) => [data.order, ...prev.filter((o) => o.id !== data.order.id)]);
+        trackAppEvent("checkout_started", {
+          packageId: pkg.code,
+          priceIDR: pkg.priceIDR,
+          paymentMethod: method,
+          currencyType: pkg.currencyType,
+          currencyAmount: pkg.amount,
+        });
       } else {
         setMsg(data.error || "Failed to create order");
       }

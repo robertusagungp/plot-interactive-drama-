@@ -77,28 +77,73 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    const sessionToken = await createSession(user.id);
+    // Persist Attribution from Cookies / Headers
+    try {
+      const { saveUserAttribution, ATTRIBUTION_COOKIE_FIRST, ATTRIBUTION_COOKIE_LAST, ANONYMOUS_SESSION_COOKIE } =
+        await import("@/lib/analytics/attribution");
 
-    const res = NextResponse.json({
+      const cookieHeader = req.headers.get("cookie") || "";
+      const getCookieVal = (name: string) => {
+        const match = cookieHeader.match(new RegExp("(^| )" + name + "=([^;]+)"));
+        return match ? decodeURIComponent(match[2]) : null;
+      };
+
+      const firstRaw = getCookieVal(ATTRIBUTION_COOKIE_FIRST);
+      const lastRaw = getCookieVal(ATTRIBUTION_COOKIE_LAST);
+      const anonId = getCookieVal(ANONYMOUS_SESSION_COOKIE);
+
+      let firstTouch = undefined;
+      let lastTouch = undefined;
+
+      if (firstRaw) {
+        try { firstTouch = JSON.parse(firstRaw); } catch {}
+      }
+      if (lastRaw) {
+        try { lastTouch = JSON.parse(lastRaw); } catch {}
+      }
+
+      await saveUserAttribution(user.id, {
+        anonymousSessionId: anonId || undefined,
+        firstTouch,
+        lastTouch,
+      });
+    } catch {}
+
+    // Dispatch Server-side CompleteRegistration event to TikTok Events API
+    try {
+      const { sendTikTokServerEvent } = await import("@/lib/services/tiktok-events-api");
+      await sendTikTokServerEvent({
+        eventName: "CompleteRegistration",
+        userId: user.id,
+        userEmail: user.email || undefined,
+        ipAddress: req.headers.get("x-forwarded-for")?.split(",")[0] || req.headers.get("x-real-ip") || undefined,
+        userAgent: req.headers.get("user-agent") || undefined,
+      });
+    } catch {}
+
+    const sessionToken = await createSession(user.id);
+    const response = NextResponse.json({
       success: true,
       user: {
         id: user.id,
         name: user.name,
         email: user.email,
         role: user.role,
+        profile: user.profile,
       },
     });
 
-    res.cookies.set("plot_session", sessionToken, {
+    response.cookies.set("plot_session", sessionToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production" && process.env.NEXT_PUBLIC_APP_URL?.startsWith("https://") ? true : false,
+      secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
-      expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+      maxAge: 30 * 24 * 60 * 60, // 30 days
       path: "/",
     });
 
-    return res;
-  } catch (err: any) {
-    return NextResponse.json({ error: err?.message || "Registration failed" }, { status: 500 });
+    return response;
+  } catch (error) {
+    console.error("Registration error:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

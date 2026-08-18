@@ -4,6 +4,10 @@ import { Navbar } from "@/components/layout/Navbar";
 import { MobileNav } from "@/components/layout/MobileNav";
 import { I18nProvider } from "@/lib/i18n/context";
 import { getServerLocale } from "@/lib/i18n/server";
+import { AttributionProvider } from "@/components/analytics/AttributionProvider";
+import { TikTokPixel } from "@/components/analytics/TikTokPixel";
+import { ConsentBanner } from "@/components/analytics/ConsentBanner";
+import { Suspense } from "react";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -35,12 +39,19 @@ export default async function RootLayout({
   return (
     <html lang={locale} className="dark">
       <body className="bg-[#090A0F] text-zinc-100 min-h-[100dvh] w-full overflow-x-hidden flex flex-col antialiased selection:bg-rose-500/30 selection:text-rose-200 touch-manipulation">
-        <I18nProvider initialLocale={locale}>
-          <Navbar />
-          <main className="flex-1 w-full max-w-full overflow-x-hidden pb-20 md:pb-8">{children}</main>
-          <MobileNav />
-        </I18nProvider>
+        <Suspense fallback={null}>
+          <AttributionProvider>
+            <I18nProvider initialLocale={locale}>
+              <Navbar />
+              <main className="flex-1 w-full max-w-full overflow-x-hidden pb-20 md:pb-8">{children}</main>
+              <MobileNav />
+              <ConsentBanner />
+              <TikTokPixel />
+            </I18nProvider>
+          </AttributionProvider>
+        </Suspense>
       </body>
     </html>
   );
 }
+

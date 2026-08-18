@@ -30,6 +30,7 @@ import { EndingScreen } from "./EndingScreen";
 import { PlayerSettingsModal } from "./PlayerSettingsModal";
 import { StatToast, StatNotification } from "./StatToast";
 import { useI18n } from "@/lib/i18n/context";
+import { trackAppEvent } from "@/lib/analytics/tracker";
 
 interface StoryPlayerProps {
   storyId: string;
@@ -129,6 +130,24 @@ export const StoryPlayer: React.FC<StoryPlayerProps> = ({
   }, [nodes]);
 
   const currentNode = nodeMap.current.get(currentNodeId) || nodes[0];
+
+  // Mount Tracking: episode_start & paywall_view
+  useEffect(() => {
+    trackAppEvent("episode_start", {
+      storyId,
+      storySlug,
+      episodeId,
+      episodeNumber,
+    });
+    if (!isUnlocked) {
+      trackAppEvent("paywall_view", {
+        storyId,
+        storySlug,
+        episodeId,
+        episodeNumber,
+      });
+    }
+  }, [storyId, storySlug, episodeId, episodeNumber, isUnlocked]);
 
   // Helper to push floating notification
   const pushNotification = useCallback(
@@ -281,6 +300,12 @@ export const StoryPlayer: React.FC<StoryPlayerProps> = ({
           setIsEpisodeFinished(true);
           setEndEpisodeConfig(config);
           soundManager.playSfx("cheer");
+          trackAppEvent("episode_complete", {
+            storyId,
+            storySlug,
+            episodeId,
+            episodeNumber,
+          });
           if (onSaveProgress) {
             onSaveProgress({
               episodeNumber,
@@ -297,6 +322,17 @@ export const StoryPlayer: React.FC<StoryPlayerProps> = ({
         case "ENDING": {
           setActiveEnding(config);
           soundManager.playSfx("cheer");
+          trackAppEvent("ending_unlocked", {
+            storyId,
+            storySlug,
+            episodeId,
+            episodeNumber,
+            endingId: config.endingSlug,
+          });
+          trackAppEvent("story_complete", {
+            storyId,
+            storySlug,
+          });
           if (onSaveProgress) {
             onSaveProgress({
               episodeNumber,
@@ -395,6 +431,17 @@ export const StoryPlayer: React.FC<StoryPlayerProps> = ({
 
   // Handle Choice Selection
   const handleSelectChoiceOption = async (option: StoryChoiceOption) => {
+    trackAppEvent("choice_selected", {
+      storyId,
+      storySlug,
+      episodeId,
+      episodeNumber,
+      nodeId: currentNode.nodeId,
+      choiceOptionId: option.id,
+      diamondCost: option.diamondCost || 0,
+      coinCost: option.coinCost || 0,
+    });
+
     // If choice requires currency, execute server spending
     if (option.diamondCost > 0 || option.coinCost > 0) {
       if (option.diamondCost > 0 && userDiamonds < option.diamondCost) {

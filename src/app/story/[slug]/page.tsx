@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { getStoryBySlug } from "@/lib/services/story";
 import { getCurrentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { trackEvent } from "@/lib/services/analytics";
 import { EpisodeList } from "@/components/story/EpisodeList";
 import Link from "next/link";
 import { Play, Sparkles, Heart, Users, BookOpen, ArrowLeft } from "lucide-react";
@@ -23,9 +24,23 @@ export async function generateMetadata({
     title: `${story.title} — PLOT Interactive Drama`,
     description: story.shortDescription,
     openGraph: {
+      title: `${story.title} — PLOT`,
+      description: story.shortDescription,
+      images: [
+        {
+          url: story.coverImage,
+          width: 800,
+          height: 1000,
+          alt: story.title,
+        },
+      ],
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
       title: story.title,
       description: story.shortDescription,
-      type: "article",
+      images: [story.coverImage],
     },
   };
 }
@@ -43,6 +58,16 @@ export default async function StoryDetailPage({
   }
 
   const user = await getCurrentUser();
+
+  // Track story view server-side
+  await trackEvent(
+    "story_view",
+    {
+      storySlug: story.slug,
+      storyId: story.id,
+    },
+    user?.id
+  );
 
   // Fetch user progress and unlocks if logged in
   let userProgress: any = null;
@@ -96,33 +121,30 @@ export default async function StoryDetailPage({
         <span>Back to Home</span>
       </Link>
 
-      {/* Hero Cover & Summary Card */}
-      <div className="rounded-3xl bg-zinc-950 border border-white/10 p-6 md:p-8 flex flex-col md:flex-row gap-8 shadow-2xl relative overflow-hidden">
-        {/* Cinematic Backdrop */}
+      {/* Hero Cover & Above-The-Fold TikTok Optimized Landing Card */}
+      <div className="rounded-3xl bg-zinc-950 border border-white/10 p-5 sm:p-6 md:p-8 flex flex-col md:flex-row gap-6 md:gap-8 shadow-2xl relative overflow-hidden">
+        {/* Cinematic Ambient Backdrop */}
         <div className="absolute inset-0 bg-gradient-to-tr from-rose-950/30 via-zinc-950 to-slate-950 pointer-events-none" />
 
-        {/* Cover Poster */}
-        <div className="relative w-full md:w-64 aspect-[3/4] rounded-2xl overflow-hidden bg-slate-900 flex-shrink-0 shadow-2xl border border-white/10">
-          <div
-            className="w-full h-full bg-cover bg-center"
-            style={{
-              backgroundImage: `linear-gradient(to top, rgba(0,0,0,0.8), transparent), linear-gradient(135deg, #451A03 0%, #1E1B4B 100%)`,
-            }}
+        {/* Cover Poster Image with Artwork */}
+        <div className="relative w-full sm:w-64 aspect-[3/4] rounded-2xl overflow-hidden bg-slate-900 flex-shrink-0 shadow-2xl border border-white/15">
+          <img
+            src={story.coverImage}
+            alt={story.title}
+            className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center">
-            <Sparkles className="w-10 h-10 text-rose-400 mb-2 opacity-80" />
-            <span className="text-xl font-black text-white leading-tight">
-              {story.title}
-            </span>
-          </div>
-
-          <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-rose-600 text-white">
+          <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-rose-600/95 backdrop-blur-md text-white shadow-lg">
             {story.ageRating}
+          </div>
+          <div className="absolute bottom-3 left-3 right-3 px-3 py-1.5 rounded-xl bg-black/80 backdrop-blur-md border border-white/10 text-center">
+            <span className="text-[11px] font-bold text-amber-300">
+              {story.episodes.length || 16} Episode • {story.endings.length || 5} Ending
+            </span>
           </div>
         </div>
 
-        {/* Story Metadata */}
-        <div className="relative z-10 flex flex-col justify-between flex-1">
+        {/* Story Metadata & Direct CTA */}
+        <div className="relative z-10 flex flex-col justify-between flex-1 gap-4">
           <div>
             <div className="flex flex-wrap gap-2 mb-3">
               {story.genres.map((g, i) => (
@@ -135,30 +157,37 @@ export default async function StoryDetailPage({
               ))}
             </div>
 
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-white mb-2">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-white mb-2 leading-tight">
               {story.title}
             </h1>
 
-            <p className="text-xs text-zinc-400 mb-4">
-              Written by <span className="text-zinc-200 font-semibold">{story.author}</span> • {story.viewCount} Reads
+            {/* Short Dramatic Hook Quote for TikTok */}
+            <div className="p-3.5 rounded-2xl bg-white/[0.04] border border-white/10 my-3">
+              <p className="text-xs sm:text-sm text-rose-200/90 italic leading-relaxed">
+                &ldquo;{story.shortDescription}&rdquo;
+              </p>
+            </div>
+
+            <p className="text-xs text-zinc-400 mb-2">
+              Ditulis oleh <span className="text-zinc-200 font-semibold">{story.author}</span> • {story.viewCount} Pembaca
             </p>
 
-            <p className="text-sm text-zinc-300 leading-relaxed mb-6">
+            <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed line-clamp-3">
               {story.description}
             </p>
           </div>
 
-          {/* Primary Action Button */}
-          <div className="flex flex-wrap items-center gap-3 pt-4 border-t border-white/10">
+          {/* Primary Action Button - MAIN SEKARANG */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-4 border-t border-white/10">
             <Link
               href={`/story/${story.slug}/episode/${currentEpisodeNumber}`}
-              className="px-7 py-3.5 rounded-2xl bg-gradient-to-r from-rose-600 via-rose-500 to-amber-500 hover:from-rose-500 hover:to-amber-400 font-extrabold text-white text-sm shadow-xl shadow-rose-950/50 flex items-center gap-2 transition hover:scale-[1.02] active:scale-[0.98]"
+              className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-rose-600 via-rose-500 to-amber-500 hover:from-rose-500 hover:to-amber-400 font-black text-white text-sm uppercase tracking-wider shadow-[0_0_25px_rgba(244,63,94,0.4)] flex items-center justify-center gap-2.5 transition hover:scale-[1.02] active:scale-[0.98]"
             >
               <Play className="w-4 h-4 fill-white" />
               <span>
                 {isStarted
-                  ? `Continue Episode ${currentEpisodeNumber}`
-                  : "Start Playing (Episode 1 Free)"}
+                  ? `LANJUTKAN EPISODE ${currentEpisodeNumber}`
+                  : "MAIN SEKARANG (EPISODE 1 GRATIS)"}
               </span>
             </Link>
           </div>

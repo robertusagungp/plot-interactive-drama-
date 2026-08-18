@@ -34,6 +34,7 @@ model User {
   achievements     UserAchievement[]
   analyticsEvents  AnalyticsEvent[]
   paymentOrders    PaymentOrder[]
+  attribution      UserAttribution?
 
   @@index([role])
 }
@@ -598,4 +599,37 @@ model UserSubscription {
 
   @@index([status])
 }
+
+model UserAttribution {
+  id                    String    @id @default(cuid())
+  userId                String    @unique
+  anonymousSessionId    String?
+  // First Touch (Acquisition origin)
+  firstTouchSource      String?   // e.g. tiktok
+  firstTouchMedium      String?   // e.g. paid | organic
+  firstTouchCampaign    String?   // e.g. amm_launch
+  firstTouchContent     String?   // e.g. amm_choice_contract_01
+  firstTouchTerm        String?
+  firstTouchLandingPath String?
+  firstTouchReferrer    String?
+  firstSeenAt           DateTime  @default(now())
+  // Last Touch (Converting touchpoint)
+  lastTouchSource       String?
+  lastTouchMedium       String?
+  lastTouchCampaign     String?
+  lastTouchContent      String?
+  lastTouchTerm         String?
+  lastTouchLandingPath  String?
+  lastTouchReferrer     String?
+  lastSeenAt            DateTime  @default(now())
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([firstTouchSource])
+  @@index([firstTouchCampaign])
+}
+
 
