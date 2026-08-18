@@ -209,6 +209,10 @@ export const StoryPlayer: React.FC<StoryPlayerProps> = ({
                 position: config.position || "center",
                 isVisible: true,
                 animation: (config.characterAnimation as MotionPreset) || "pulse",
+                activity: config.activity,
+                activityTextId: config.activityTextId,
+                activityTextEn: config.activityTextEn,
+                reactionFx: config.reactionFx || "none",
               },
             }));
           }
@@ -859,6 +863,12 @@ export const StoryPlayer: React.FC<StoryPlayerProps> = ({
             <DialogueBox
               speaker={dialogueSpeaker}
               characterSlug={currentNode.config.characterSlug}
+              expression={currentNode.config.expression}
+              activityText={
+                locale === "id" && currentNode.config.activityTextId
+                  ? currentNode.config.activityTextId
+                  : currentNode.config.activityTextEn || currentNode.config.activity
+              }
               text={dialogueText}
               onAdvance={advanceNode}
               isChoiceActive={false}

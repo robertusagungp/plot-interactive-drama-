@@ -1309,6 +1309,52 @@ function getEpisodeIllustration(slug: string, epNum: number, bgSlug: string): st
   return list[(epNum - 1) % list.length];
 }
 
+function getDialogueActivityAndReaction(speaker: string, expr: string, epNum: number, slug: string, textId: string) {
+  let activity = "talking";
+  let activityTextId = "Berbicara dengan intens";
+  let activityTextEn = "Speaking with intensity";
+  let reactionFx: "hearts" | "sparks" | "sweat" | "camera_flash" | "gleam" | "notes" | "none" = "none";
+
+  if (expr === "smirk" || textId.includes("kontrak") || textId.includes("merger") || textId.includes("direksi") || textId.includes("uang")) {
+    activity = "signing_contract";
+    activityTextId = "Memeriksa berkas & tersenyum penuh percaya diri";
+    activityTextEn = "Reviewing documents with a confident smirk";
+    reactionFx = "gleam";
+  } else if (expr === "happy" || textId.includes("cinta") || textId.includes("peluk") || textId.includes("sayang") || textId.includes("manis") || textId.includes("tatap")) {
+    activity = "holding_hand";
+    activityTextId = "Menatap lekat & memancarkan rasa sayang";
+    activityTextEn = "Looking lovingly with warm affection";
+    reactionFx = "hearts";
+  } else if (expr === "angry" || expr === "determined" || textId.includes("mundur") || textId.includes("ancam") || textId.includes("bahaya") || textId.includes("tembak")) {
+    activity = slug.includes("mafia") ? "gun_aim" : "examining_documents";
+    activityTextId = slug.includes("mafia") ? "Mengunci tatapan tajam & bersiap siaga" : "Mempertegas batas & memasang sikap waspada";
+    activityTextEn = "Locking fierce eye contact in high alert";
+    reactionFx = "sparks";
+  } else if (slug.includes("idol") || slug.includes("superstar") || slug.includes("actor") || slug.includes("debut")) {
+    activity = epNum % 2 === 0 ? "stage_singing" : "camera_flash";
+    activityTextId = epNum % 2 === 0 ? "Memegang mikrofon di bawah lampu panggung" : "Menghindari sorotan kamera paparazzi";
+    activityTextEn = epNum % 2 === 0 ? "Holding microphone under stage lights" : "Dodging intense paparazzi flashbulbs";
+    reactionFx = epNum % 2 === 0 ? "notes" : "camera_flash";
+  } else if (slug.includes("surgeon") || slug.includes("doctor")) {
+    activity = "operating";
+    activityTextId = "Memantau grafik denyut jantung pasien";
+    activityTextEn = "Monitoring vital ECG telemetry readings";
+    reactionFx = "gleam";
+  } else if (slug.includes("coffee") || slug.includes("cafe")) {
+    activity = "drinking_coffee";
+    activityTextId = "Menyeruput kopi hangat di meja kafe";
+    activityTextEn = "Sipping artisan coffee at the table";
+    reactionFx = "gleam";
+  } else {
+    activity = "examining_documents";
+    activityTextId = "Menegaskan rencana aksi berikutnya";
+    activityTextEn = "Asserting the strategic action plan";
+    reactionFx = "gleam";
+  }
+
+  return { activity, activityTextId, activityTextEn, reactionFx };
+}
+
 function buildBespokeDialogueArcs(config: any, ep: any, epNum: number) {
   const hero = config.heroId;
   const heroEn = config.heroEn;
@@ -1324,16 +1370,23 @@ function buildBespokeDialogueArcs(config: any, ep: any, epNum: number) {
   const ctx = getDramaDialogueContext(config.slug, epNum, hero, rival, title, synopsis, drama);
   const coverImage = getEpisodeIllustration(config.slug, epNum, ctx.bgSlug);
 
-  const dialogues = ctx.dialogues.map((d: any) => ({
-    speakerEn: d.speaker === "Protagonist" ? "Protagonist" : heroEn,
-    speakerId: d.speaker === "Protagonist" ? "Protagonis" : hero,
-    charSlug: d.speaker === "Protagonist" ? undefined : config.heroSlug,
-    expr: d.expr,
-    pos: d.pos as any,
-    textId: d.textId,
-    textEn: d.textEn,
-    sfx: d.sfx,
-  }));
+  const dialogues = ctx.dialogues.map((d: any) => {
+    const act = getDialogueActivityAndReaction(d.speaker, d.expr || "normal", epNum, config.slug, d.textId || "");
+    return {
+      speakerEn: d.speaker === "Protagonist" ? "Protagonist" : heroEn,
+      speakerId: d.speaker === "Protagonist" ? "Protagonis" : hero,
+      charSlug: d.speaker === "Protagonist" ? undefined : config.heroSlug,
+      expr: d.expr || "normal",
+      pos: (d.pos as any) || (d.speaker === "Protagonist" ? "left" : "right"),
+      textId: d.textId,
+      textEn: d.textEn,
+      activity: act.activity,
+      activityTextId: act.activityTextId,
+      activityTextEn: act.activityTextEn,
+      reactionFx: act.reactionFx,
+      sfx: d.sfx,
+    };
+  });
 
   const climaxDialogues = [
     {
@@ -1344,6 +1397,10 @@ function buildBespokeDialogueArcs(config: any, ep: any, epNum: number) {
       pos: "center" as const,
       textId: ctx.climaxId,
       textEn: ctx.climaxEn,
+      activity: "confrontation",
+      activityTextId: "Membanting dokumen & menuntut kejelasan",
+      activityTextEn: "Slamming dossier in intense confrontation",
+      reactionFx: "sparks",
       sfx: "door_slam",
     },
     {
@@ -1354,6 +1411,10 @@ function buildBespokeDialogueArcs(config: any, ep: any, epNum: number) {
       pos: "right" as const,
       textId: `Mending kamu mundur, ${rival}. Kamu udah nggak punya hak apa-apa lagi di sini. Berani sentuh dia, urusannya bakal panjang sama aku.`,
       textEn: `Step back, ${rivalEn}. You have no power here anymore. Touch them, and you'll answer to me.`,
+      activity: "guarding",
+      activityTextId: "Melangkah maju & pasang badan melindungi",
+      activityTextEn: "Stepping forward to shield and protect",
+      reactionFx: "sparks",
       sfx: "stat_up",
     },
   ];

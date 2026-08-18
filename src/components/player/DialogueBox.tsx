@@ -2,13 +2,15 @@
 
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { ChevronDown, Sparkles } from "lucide-react";
+import { ChevronDown, Sparkles, Activity } from "lucide-react";
 import { getCharacterColor } from "@/lib/art-assets";
 import { useI18n } from "@/lib/i18n/context";
 
 interface DialogueBoxProps {
   speaker?: string;
   characterSlug?: string;
+  expression?: string;
+  activityText?: string;
   text: string;
   isNarration?: boolean;
   narrationStyle?: "standard" | "internal_thought" | "cinematic_quote" | "headline";
@@ -19,6 +21,8 @@ interface DialogueBoxProps {
 export const DialogueBox: React.FC<DialogueBoxProps> = ({
   speaker,
   characterSlug,
+  expression = "normal",
+  activityText,
   text,
   isNarration = false,
   narrationStyle = "standard",
@@ -77,10 +81,10 @@ export const DialogueBox: React.FC<DialogueBoxProps> = ({
           transition={{ duration: 0.25 }}
           className={`relative rounded-2xl backdrop-blur-xl border p-4 shadow-[0_10px_30px_rgba(0,0,0,0.8)] ${
             narrationStyle === "internal_thought"
-              ? "bg-slate-950/80 border-cyan-500/30 text-cyan-100"
+              ? "bg-slate-950/85 border-cyan-500/30 text-cyan-100"
               : narrationStyle === "headline"
-              ? "bg-amber-950/80 border-amber-500/40 text-amber-100 font-semibold text-center"
-              : "bg-zinc-950/85 border-white/10 text-zinc-200"
+              ? "bg-amber-950/85 border-amber-500/40 text-amber-100 font-semibold text-center"
+              : "bg-zinc-950/90 border-white/10 text-zinc-200"
           }`}
         >
           <div className="flex items-center gap-1.5 mb-1.5 opacity-60 text-xs uppercase tracking-widest font-medium">
@@ -126,25 +130,39 @@ export const DialogueBox: React.FC<DialogueBoxProps> = ({
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.2 }}
-        className="relative rounded-2xl bg-zinc-950/90 backdrop-blur-xl border border-white/15 p-4 md:p-5 shadow-[0_15px_35px_rgba(0,0,0,0.9)]"
+        className="relative rounded-2xl bg-zinc-950/95 backdrop-blur-xl border border-white/15 p-4 md:p-5 shadow-[0_15px_35px_rgba(0,0,0,0.9)]"
       >
-        {/* Speaker Badge */}
-        {speaker && (
-          <div className="absolute -top-3.5 left-4 flex items-center gap-2">
+        {/* Speaker Badge & Active Action Pill */}
+        <div className="absolute -top-3.5 left-4 right-4 flex items-center justify-between gap-2 overflow-hidden pointer-events-none">
+          {speaker && (
             <span
-              className="px-3 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider text-white shadow-md border"
+              className="px-3 py-0.5 rounded-full text-xs font-black uppercase tracking-wider text-white shadow-md border flex items-center gap-1.5"
               style={{
                 backgroundColor: palette?.suit || "#18181B",
                 borderColor: palette?.accent || "#3F3F46",
               }}
             >
+              <span
+                className="w-1.5 h-1.5 rounded-full animate-ping"
+                style={{ backgroundColor: palette?.accent || "#38BDF8" }}
+              />
               {speaker}
             </span>
-          </div>
-        )}
+          )}
+
+          {activityText && (
+            <motion.span
+              initial={{ opacity: 0, x: 10 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="px-2.5 py-0.5 rounded-full text-[10px] font-bold text-amber-300 bg-black/80 border border-amber-500/30 backdrop-blur-md shadow truncate max-w-[190px]"
+            >
+              ⚡ {activityText}
+            </motion.span>
+          )}
+        </div>
 
         {/* Dialogue Content */}
-        <p className="text-zinc-100 text-sm md:text-[15px] leading-relaxed pt-1 min-h-[48px]">
+        <p className="text-zinc-100 text-sm md:text-[15px] leading-relaxed pt-1.5 min-h-[48px]">
           {displayedText}
         </p>
 

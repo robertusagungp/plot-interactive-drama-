@@ -91,6 +91,10 @@ export const DialogueConfigSchema = z.object({
   position: z.enum(["left", "center", "right"]).default("center"),
   characterAnimation: z.string().default("none"),
   backgroundEffect: z.string().default("none"),
+  activity: z.string().optional(),
+  activityTextId: z.string().optional(),
+  activityTextEn: z.string().optional(),
+  reactionFx: z.enum(["hearts", "sparks", "sweat", "camera_flash", "gleam", "notes", "none"]).optional(),
   sfx: z.string().optional(),
   sfxMood: z.string().optional(),
 });
@@ -224,6 +228,10 @@ export interface PlayerCharacterState {
   expression: string;
   position: CharacterPosition;
   animation?: MotionPreset;
+  activity?: string;
+  activityTextId?: string;
+  activityTextEn?: string;
+  reactionFx?: "hearts" | "sparks" | "sweat" | "camera_flash" | "gleam" | "notes" | "none";
   isVisible: boolean;
 }
 

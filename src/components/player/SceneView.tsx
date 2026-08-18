@@ -205,6 +205,9 @@ export const SceneView: React.FC<SceneViewProps> = ({
                   position="left"
                   customAvatarUrl={char.avatarUrl}
                   isSpeaking={char.slug === activeSpeakerSlug}
+                  activity={char.activity}
+                  activityText={char.activityTextId || char.activityTextEn}
+                  reactionFx={char.reactionFx}
                 />
               </motion.div>
             ))}
@@ -230,6 +233,9 @@ export const SceneView: React.FC<SceneViewProps> = ({
                   position="center"
                   customAvatarUrl={char.avatarUrl}
                   isSpeaking={char.slug === activeSpeakerSlug}
+                  activity={char.activity}
+                  activityText={char.activityTextId || char.activityTextEn}
+                  reactionFx={char.reactionFx}
                 />
               </motion.div>
             ))}
@@ -255,6 +261,9 @@ export const SceneView: React.FC<SceneViewProps> = ({
                   position="right"
                   customAvatarUrl={char.avatarUrl}
                   isSpeaking={char.slug === activeSpeakerSlug}
+                  activity={char.activity}
+                  activityText={char.activityTextId || char.activityTextEn}
+                  reactionFx={char.reactionFx}
                 />
               </motion.div>
             ))}
