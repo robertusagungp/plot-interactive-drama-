@@ -958,20 +958,58 @@ function buildBespokeDialogueArcs(config: any, ep: any, epNum: number) {
   const drama = config.titleId;
   const dramaEn = config.titleEn;
 
-  // 1. Contextual Location & Audio
+  // 1. Contextual Location & Audio based on Genre & Episode Progression
+  const isMusic = config.genres.includes("Music") || config.tags.some((t: string) => t.toLowerCase().includes("idol"));
+  const isRevenge = config.genres.includes("Revenge") || config.genres.includes("Thriller") || config.slug.includes("mafia");
+  const isMedical = config.slug.includes("surgeon");
+  const isFantasy = config.genres.includes("Fantasy") || config.slug.includes("reincarnated");
+  const isEspionage = config.slug.includes("intelligence") || config.slug.includes("bodyguard");
+
   const bgSlug =
-    epNum === 1 || epNum === 5 || epNum === 9 ? "penthouse" :
-    epNum === 2 || epNum === 6 || epNum === 13 ? "boardroom" :
+    epNum === 1 || epNum === 5 || epNum === 9 ? (isMusic ? "office" : isFantasy ? "ballroom" : "penthouse") :
+    epNum === 2 || epNum === 6 || epNum === 13 ? (isMedical ? "office" : "boardroom") :
     epNum === 3 || epNum === 8 || epNum === 14 ? "rain_street" :
     epNum === 4 || epNum === 10 || epNum === 15 ? "ballroom" :
     epNum === 7 || epNum === 11 ? "bedroom" : "office";
 
   const bgMusic =
-    epNum % 4 === 1 ? "romantic" :
+    epNum % 4 === 1 ? (isMusic ? "romantic" : "romantic") :
     epNum % 4 === 2 ? "tense" :
-    epNum % 4 === 3 ? "dramatic" : "mystery";
+    epNum % 4 === 3 ? (isFantasy ? "dramatic" : "dramatic") : "mystery";
 
-  // 2. Rich Multi-Turn Dialogues Tailored to Exact Episode in Natural Everyday Indonesian
+  // 2. Genre-Specific Character Voice Lines (Authentic Vernacular & Subtext)
+  let heroLine1Id = `Coba kamu liat berkas ini baik-baik. Soal "${title}", apalagi ${synopsis.toLowerCase()} Besok pagi seisi kota bakal heboh ngomongin kita berdua. Kamu beneran siap hadapin semua ini bareng aku?`;
+  let heroLine1En = `Take a look at this file. Regarding "${titleEn}"—especially ${synopsisEn.toLowerCase()} By tomorrow, the whole city will be buzzing about us. Are you genuinely ready to face this with me?`;
+
+  let heroLine2Id = `Tatapan kamu yang nggak mau kalah itu... jujur selalu bikin aku susah buat berpaling. Tapi inget ya: musuh kita lagi nunggu satu kesalahan kecil aja dari kita.`;
+  let heroLine2En = `That fierce look in your eyes... it's the exact reason I can never look away from you. But remember: our enemies are waiting for a single misstep.`;
+
+  let heroLine3Id = `Mendekat ke sini sebentar. Sebelum mereka dateng, aku mau denger langsung dari kamu... Kamu ada di sampingku cuma karena terpaksa, atau emang ada rasa lain?`;
+  let heroLine3En = `Come closer. Before they arrive, I want to hear it straight from you... Are you standing by me just for the deal, or is there something real between us?`;
+
+  if (isMusic) {
+    heroLine1Id = `Topi dan ear-monitor kamu miring. Benerin dulu sebelum lampu panggung nyala di "${title}". Soal ${synopsis.toLowerCase()}—aku nggak mau nama kamu jadi sasaran media malam ini.`;
+    heroLine1En = `Adjust your earpiece before the stage lights go live for "${titleEn}". Regarding ${synopsisEn.toLowerCase()}—I won't let your name become tabloid fodder tonight.`;
+    heroLine2Id = `Di depan jutaan fans aku harus pasang senyum sempurna, tapi cuma di depan kamu aku bisa jadi diri sendiri tanpa topeng.`;
+    heroLine2En = `In front of millions of fans I have to wear a practiced smile, but only with you can I breathe without wearing a mask.`;
+    heroLine3Id = `Jangan mundur. Sebelum staf agensi masuk ke ruang ganti ini... tatap mata aku. Lagu yang aku tulis semalam, itu tentang kamu.`;
+    heroLine3En = `Don't step back. Before the agency staff bursts into this dressing room... look into my eyes. That melody I wrote last night was for you.`;
+  } else if (isRevenge) {
+    heroLine1Id = `Semua bukti sudah di tangan kita. Di babak "${title}", terutama ${synopsis.toLowerCase()}—keluarga mereka bakal sadar kalau kita nggak bisa dibeli dengan uang.`;
+    heroLine1En = `All the evidence is in our hands. In "${titleEn}", especially ${synopsisEn.toLowerCase()}—they will realize our silence cannot be bought.`;
+    heroLine2Id = `Balas dendam ini berbahaya. Tapi selama kamu berdiri tepat di samping jas hitamku, nggak akan ada satu orang pun yang berani nyentuh kamu.`;
+    heroLine2En = `This revenge is treacherous. But as long as you stand right beside me, not a single soul will dare lay a finger on you.`;
+    heroLine3Id = `Tanganmu dingin. Tatap aku... Saat badai ini selesai, apakah kamu masih mau ada di sisiku?`;
+    heroLine3En = `Your hands are cold. Look at me... When this storm settles, will you still choose to remain by my side?`;
+  } else if (isFantasy) {
+    heroLine1Id = `Cawan emas di pesta "${title}" ini penuh intrik. Perhatikan apa yang terjadi saat ${synopsis.toLowerCase()}—jangan lengah sedikit pun, Nona.`;
+    heroLine1En = `The golden goblets at the banquet of "${titleEn}" conceal deep intrigue. Watch closely regarding ${synopsisEn.toLowerCase()}—do not drop your guard for a second.`;
+    heroLine2Id = `Naskah takdir kerajaan ini mungkin meramalkan kehancuran, namun pedang dan seluruh kesetiaanku sepenuhnya ada di tanganmu.`;
+    heroLine2En = `The imperial prophecies may foretell doom, but my sword and entire allegiance rest unconditionally in your hands.`;
+    heroLine3Id = `Pegang jubahku erat-erat. Sebelum fajar menyingsing di istana agung... izinkan aku melindungi hatimu selamanya.`;
+    heroLine3En = `Hold firmly onto my cloak. Before dawn breaks across the grand palace... permit me to safeguard your heart for all eternity.`;
+  }
+
   const dialogues = [
     {
       speakerEn: heroEn,
@@ -979,8 +1017,8 @@ function buildBespokeDialogueArcs(config: any, ep: any, epNum: number) {
       charSlug: config.heroSlug,
       expr: epNum % 2 === 0 ? "normal" : "smirk",
       pos: "right" as const,
-      textEn: `Take a look at this file. Regarding "${titleEn}"—especially ${synopsisEn.toLowerCase()} By tomorrow, the whole city will be buzzing about us. Are you genuinely ready to face this with me?`,
-      textId: `Coba kamu liat berkas ini baik-baik. Soal "${title}", apalagi ${synopsis.toLowerCase()} Besok pagi seisi kota bakal heboh ngomongin kita berdua. Kamu beneran siap hadapin semua ini bareng aku?`,
+      textEn: heroLine1En,
+      textId: heroLine1Id,
       sfx: epNum % 3 === 0 ? "camera_flash" : "heartbeat",
     },
     {
@@ -997,8 +1035,8 @@ function buildBespokeDialogueArcs(config: any, ep: any, epNum: number) {
       charSlug: config.heroSlug,
       expr: epNum % 3 === 0 ? "happy" : "smirk",
       pos: "right" as const,
-      textEn: `That fierce look in your eyes... it's the exact reason I can never look away from you. But remember: our enemies are waiting for a single misstep.`,
-      textId: `Tatapan kamu yang nggak mau kalah itu... jujur selalu bikin aku susah buat berpaling. Tapi inget ya: musuh kita lagi nunggu satu kesalahan kecil aja dari kita.`,
+      textEn: heroLine2En,
+      textId: heroLine2Id,
     },
     {
       speakerEn: "Protagonist",
@@ -1014,8 +1052,8 @@ function buildBespokeDialogueArcs(config: any, ep: any, epNum: number) {
       charSlug: config.heroSlug,
       expr: "happy",
       pos: "right" as const,
-      textEn: `Come closer. Before they arrive, I want to hear it straight from you... Are you standing by me just for the deal, or is there something real between us?`,
-      textId: `Mendekat ke sini sebentar. Sebelum mereka dateng, aku mau denger langsung dari kamu... Kamu ada di sampingku cuma karena terpaksa, atau emang ada rasa lain?`,
+      textEn: heroLine3En,
+      textId: heroLine3Id,
       sfx: "heartbeat",
     },
   ];
