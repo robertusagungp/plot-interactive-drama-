@@ -24,6 +24,7 @@ export const AdminSidebar: React.FC = () => {
     { label: "Characters", href: "/admin/characters", icon: Users },
     { label: "Asset Storage", href: "/admin/assets", icon: Image },
     { label: "Analytics & Funnel", href: "/admin/analytics", icon: BarChart3 },
+    { label: "TikTok Marketing", href: "/admin/marketing", icon: Sparkles },
     { label: "Users & Roles", href: "/admin/users", icon: UserCheck },
   ];
 

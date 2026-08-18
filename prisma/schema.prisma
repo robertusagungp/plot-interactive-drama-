@@ -632,4 +632,12 @@ model UserAttribution {
   @@index([firstTouchCampaign])
 }
 
+model SystemSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+
 
