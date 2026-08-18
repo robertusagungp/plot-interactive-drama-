@@ -4,20 +4,33 @@ import { getAll20NewStories } from "./stories-data";
 
 const prisma = new PrismaClient();
 
-async function seedSingleDrama(sDef: any, sIdx: number, total: number, genreMap: Record<string, string>) {
-  console.log(`⏳ [${sIdx + 1}/${total}] Memproses: ${sDef.title}`);
+async function withRetry<T>(fn: () => Promise<T>, retries = 3, delay = 1000): Promise<T> {
+  try {
+    return await fn();
+  } catch (err: any) {
+    if (retries > 0) {
+      await new Promise((r) => setTimeout(r, delay));
+      return withRetry(fn, retries - 1, delay * 1.5);
+    }
+    throw err;
+  }
+}
 
-  const story = await prisma.story.upsert({
-    where: { slug: sDef.slug },
-    update: {
-      title: sDef.title,
-      titleId: sDef.titleId,
-      shortDescription: sDef.shortDescription,
-      shortDescriptionId: sDef.shortDescriptionId,
-      description: sDef.description,
-      descriptionId: sDef.descriptionId,
-      featured: sDef.featured || false,
-    },
+async function seedSingleDrama(sDef: any, sIdx: number, total: number, genreMap: Record<string, string>) {
+  return withRetry(async () => {
+    console.log(`⏳ [${sIdx + 1}/${total}] Memproses: ${sDef.title}`);
+
+    const story = await prisma.story.upsert({
+      where: { slug: sDef.slug },
+      update: {
+        title: sDef.title,
+        titleId: sDef.titleId,
+        shortDescription: sDef.shortDescription,
+        shortDescriptionId: sDef.shortDescriptionId,
+        description: sDef.description,
+        descriptionId: sDef.descriptionId,
+        featured: sDef.featured || false,
+      },
     create: {
       title: sDef.title,
       titleId: sDef.titleId,
@@ -401,6 +414,7 @@ async function seedSingleDrama(sDef: any, sIdx: number, total: number, genreMap:
   }
 
   console.log(`✅ [${sIdx + 1}/${total}] Selesai: ${sDef.title}`);
+});
 }
 
 async function main() {
@@ -515,13 +529,14 @@ async function main() {
   const newStories = getAll20NewStories();
   console.log(`🎬 Seeding ${newStories.length} new complete dramas (16 episodes each)...`);
 
-  // Process in chunks of 4 concurrent stories for maximum cloud DB throughput
-  const CHUNK_SIZE = 4;
+  // Process in chunks of 2 concurrent stories with brief delay for rock-solid cloud DB throughput
+  const CHUNK_SIZE = 2;
   for (let i = 0; i < newStories.length; i += CHUNK_SIZE) {
     const chunk = newStories.slice(i, i + CHUNK_SIZE);
     await Promise.all(
       chunk.map((sDef, idx) => seedSingleDrama(sDef, i + idx, newStories.length, genreMap))
     );
+    await new Promise((resolve) => setTimeout(resolve, 300));
   }
 
   console.log("✅ Seeding completed successfully! 21 stories & 330+ episodes ready.");
