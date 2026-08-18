@@ -23,6 +23,8 @@ model User {
   profile          Profile?
   wallet           Wallet?
   dailyRewardState DailyRewardState?
+  subscription     UserSubscription?
+  timelines        UserStoryTimeline[]
   storyProgress    UserStoryProgress[]
   episodeProgress  UserEpisodeProgress[]
   choices          UserChoice[]
@@ -119,6 +121,7 @@ model Story {
   statDefinitions   StoryStatDefinition[]
   episodes          Episode[]
   endings           Ending[]
+  timelines         UserStoryTimeline[]
   userProgress      UserStoryProgress[]
   userChoices       UserChoice[]
   userRelationships UserRelationship[]
@@ -555,3 +558,44 @@ model AnalyticsEvent {
   @@index([createdAt])
   @@index([userId])
 }
+
+model UserStoryTimeline {
+  id                   String    @id @default(cuid())
+  userId               String
+  storyId              String
+  name                 String    @default("Timeline Utama")
+  slotIndex            Int       @default(0) // 0 (Free default), 1, 2 (Premium slots)
+  currentEpisodeNumber Int       @default(1)
+  lastPlayedNodeId     String?
+  isCompleted          Boolean   @default(false)
+  statsJson            String    @default("{}") // e.g. {"REPUTATION": 65, "LOVE": 70}
+  relationshipsJson    String    @default("{}") // e.g. {"adrian": {"love": 60, "trust": 80}}
+  flagsJson            String    @default("[]") // Array of set decision flags
+  choicesJson          String    @default("{}") // Map of choiceNodeId -> optionId
+  unlockedEndings      String    @default("[]") // Array of ending slugs discovered
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  story Story @relation(fields: [storyId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, storyId, slotIndex])
+  @@index([userId])
+  @@index([storyId])
+}
+
+model UserSubscription {
+  id         String    @id @default(cuid())
+  userId     String    @unique
+  tier       String    @default("PLUS") // PLUS | VIP
+  status     String    @default("ACTIVE") // ACTIVE | CANCELLED | EXPIRED
+  startedAt  DateTime  @default(now())
+  expiresAt  DateTime
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+}
+

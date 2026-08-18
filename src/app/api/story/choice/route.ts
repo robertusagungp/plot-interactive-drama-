@@ -30,6 +30,26 @@ export async function POST(req: NextRequest) {
     let updatedWalletBalance: { coins?: number; diamonds?: number } = {};
 
     if (user) {
+      const { db } = await import("@/lib/db");
+      const existingChoice = await db.userChoice.findFirst({
+        where: {
+          userId: user.id,
+          storyId,
+          episodeId,
+          nodeId,
+        },
+      });
+
+      if (existingChoice) {
+        // Idempotency: choice was already recorded and paid for!
+        const percentages = await getChoiceAggregation(nodeId);
+        return NextResponse.json({
+          success: true,
+          alreadyRecorded: true,
+          percentages,
+        });
+      }
+
       const wallet = await getOrCreateUserWallet(user.id);
 
       // Validate and deduct Diamonds for premium choice

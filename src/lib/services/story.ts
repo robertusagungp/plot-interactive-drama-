@@ -299,6 +299,21 @@ export async function saveUserStoryProgress(data: {
     }
   }
 
+  // Sync with timeline
+  try {
+    const { saveTimelineProgress } = await import("./timelines");
+    await saveTimelineProgress({
+      userId,
+      storyId,
+      episodeNumber,
+      lastPlayedNodeId: data.lastNodeId,
+      isCompleted,
+      stats,
+      relationships,
+      endingSlug,
+    });
+  } catch {}
+
   // Trigger achievements
   if (isCompleted) {
     await unlockAchievementForUser(userId, "FIRST_EPISODE");
@@ -309,4 +324,69 @@ export async function saveUserStoryProgress(data: {
       }
     }
   }
+}
+
+export async function getUserStoryJourney(userId: string, storySlug: string) {
+  const story = await db.story.findUnique({
+    where: { slug: storySlug },
+    include: {
+      endings: true,
+      characters: true,
+    },
+  });
+
+  if (!story) return null;
+
+  const [choices, userProgress, relationships, stats] = await Promise.all([
+    db.userChoice.findMany({
+      where: { userId, storyId: story.id },
+      include: { episode: { select: { number: true, title: true, titleId: true } } },
+      orderBy: { createdAt: "asc" },
+    }),
+    db.userStoryProgress.findUnique({
+      where: { userId_storyId: { userId, storyId: story.id } },
+    }),
+    db.userRelationship.findMany({
+      where: { userId, storyId: story.id },
+      include: { character: true },
+    }),
+    db.userStoryStat.findMany({
+      where: { userId, storyId: story.id },
+    }),
+  ]);
+
+  const unlockedEndingSlugs: string[] = JSON.parse(userProgress?.unlockedEndings || "[]");
+
+  // Calculate dynamic PLOT DNA persona from choices
+  const totalChoices = choices.length;
+  const romanticCount = choices.filter((c) => c.choiceOptionText.toLowerCase().includes("love") || c.choiceOptionText.toLowerCase().includes("cinta") || c.choiceOptionText.toLowerCase().includes("peluk") || c.choiceOptionText.toLowerCase().includes("bisik")).length;
+  const strategicCount = choices.filter((c) => c.choiceOptionText.toLowerCase().includes("tenang") || c.choiceOptionText.toLowerCase().includes("rencana") || c.choiceOptionText.toLowerCase().includes("wibawa") || c.choiceOptionText.toLowerCase().includes("strategi")).length;
+
+  const plotDna = {
+    romantic: totalChoices > 0 ? Math.min(100, Math.round((romanticCount / totalChoices) * 100 + 40)) : 50,
+    strategic: totalChoices > 0 ? Math.min(100, Math.round((strategicCount / totalChoices) * 100 + 50)) : 60,
+    loyal: 85,
+    dominantTrait: romanticCount >= strategicCount ? "Romantic Devotion" : "Strategic Mastermind",
+    dominantTraitId: romanticCount >= strategicCount ? "Penuh Cinta & Romantis" : "Ahli Strategi & Berwibawa",
+  };
+
+  // Compile "Previously on PLOT" dynamic recap from choices
+  const recaps = choices.slice(-3).map((c) => ({
+    episodeNumber: c.episode.number,
+    episodeTitle: c.episode.titleId || c.episode.title,
+    choiceText: c.choiceOptionText,
+  }));
+
+  return {
+    story,
+    currentEpisode: userProgress?.currentEpisodeNumber || 1,
+    isCompleted: userProgress?.isCompleted || false,
+    unlockedEndings: story.endings.filter((e) => unlockedEndingSlugs.includes(e.slug)),
+    allEndingsCount: story.endings.length,
+    relationships,
+    stats,
+    choices,
+    recaps,
+    plotDna,
+  };
 }

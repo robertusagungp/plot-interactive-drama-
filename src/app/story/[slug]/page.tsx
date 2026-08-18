@@ -202,6 +202,62 @@ export default async function StoryDetailPage({
         </div>
       </section>
 
+      {/* Discovered Endings Gallery */}
+      <section className="flex flex-col gap-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-5 h-5 text-amber-400" />
+            <h2 className="text-xl font-bold text-white">
+              Ending Gallery ({story.endings.length} Endings)
+            </h2>
+          </div>
+          <span className="text-xs text-zinc-400">
+            Discover all routes through your choices
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          {story.endings.map((ending) => {
+            const isUnlocked = userProgress?.unlockedEndings
+              ? JSON.parse(userProgress.unlockedEndings).includes(ending.slug)
+              : false;
+
+            return (
+              <div
+                key={ending.id}
+                className={`p-4 rounded-2xl border transition ${
+                  isUnlocked
+                    ? "bg-gradient-to-br from-rose-950/40 via-zinc-900 to-zinc-900 border-rose-500/40 shadow-lg"
+                    : "bg-zinc-950/60 border-white/5 opacity-60"
+                }`}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span
+                    className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full ${
+                      isUnlocked
+                        ? "bg-rose-500/20 text-rose-300 border border-rose-500/30"
+                        : "bg-zinc-800 text-zinc-400"
+                    }`}
+                  >
+                    {isUnlocked ? ending.badgeTitleId || ending.badgeTitle : "LOCKED ENDING"}
+                  </span>
+                  <span className="text-xs">{isUnlocked ? "🏆" : "🔒"}</span>
+                </div>
+
+                <h3 className="text-sm font-bold text-white mb-1">
+                  {isUnlocked ? ending.titleId || ending.title : "??? Ending Rahasia"}
+                </h3>
+                <p className="text-xs text-zinc-400 leading-relaxed">
+                  {isUnlocked
+                    ? ending.descriptionId || ending.description
+                    : "Mainkan ulang dan buat keputusan berbeda di momen penting untuk membuka ending ini."}
+                </p>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
       {/* Episodes List */}
       <section className="flex flex-col gap-4">
         <div className="flex items-center justify-between">

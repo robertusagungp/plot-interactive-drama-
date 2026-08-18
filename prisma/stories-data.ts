@@ -971,7 +971,7 @@ function buildBespokeDialogueArcs(config: any, ep: any, epNum: number) {
     epNum % 4 === 2 ? "tense" :
     epNum % 4 === 3 ? "dramatic" : "mystery";
 
-  // 2. Rich Multi-Turn Dialogues Tailored to Exact Episode
+  // 2. Rich Multi-Turn Dialogues Tailored to Exact Episode in Natural Everyday Indonesian
   const dialogues = [
     {
       speakerEn: heroEn,
@@ -979,8 +979,8 @@ function buildBespokeDialogueArcs(config: any, ep: any, epNum: number) {
       charSlug: config.heroSlug,
       expr: epNum % 2 === 0 ? "normal" : "smirk",
       pos: "right" as const,
-      textEn: `We're at the turning point of "${titleEn}". Look at what happened with ${synopsisEn.toLowerCase()} Everything we planned is being tested right now.`,
-      textId: `Kita berada di titik penentuan dalam "${title}". Lihat apa yang terjadi mengenai ${synopsis.toLowerCase()} Semua yang kita rencanakan sedang diuji saat ini.`,
+      textEn: `Take a look at this file. Regarding "${titleEn}"—especially ${synopsisEn.toLowerCase()} By tomorrow, the whole city will be buzzing about us. Are you genuinely ready to face this with me?`,
+      textId: `Coba kamu liat berkas ini baik-baik. Soal "${title}", apalagi ${synopsis.toLowerCase()} Besok pagi seisi kota bakal heboh ngomongin kita berdua. Kamu beneran siap hadapin semua ini bareng aku?`,
       sfx: epNum % 3 === 0 ? "camera_flash" : "heartbeat",
     },
     {
@@ -988,8 +988,8 @@ function buildBespokeDialogueArcs(config: any, ep: any, epNum: number) {
       speakerId: "Protagonis",
       expr: "determined",
       pos: "left" as const,
-      textEn: `I'm not backing down, ${heroEn}. We came into this together, and I intend to see it through to the end.`,
-      textId: `Aku tidak akan mundur, ${hero}. Kita melangkah ke dalam situasi ini bersama, dan aku akan menghadapinya sampai tuntas.`,
+      textEn: `I'm not backing down, ${heroEn}. We decided to take this on together, and I'm seeing it through to the end.`,
+      textId: `Aku nggak akan mundur, ${hero}. Dari awal kita udah mutusin buat jalanin ini bareng, dan aku bakal hadapin sampai tuntas.`,
     },
     {
       speakerEn: heroEn,
@@ -997,16 +997,16 @@ function buildBespokeDialogueArcs(config: any, ep: any, epNum: number) {
       charSlug: config.heroSlug,
       expr: epNum % 3 === 0 ? "happy" : "smirk",
       pos: "right" as const,
-      textEn: `That fierce look in your eyes... it's the reason I can't look away from you. But listen closely: our enemies are watching our every move.`,
-      textId: `Tatapan tajam di matamu itu... itulah alasan aku tidak pernah bisa berpaling darimu. Tapi dengarkan baik-baik: musuh kita sedang mengawasi setiap langkah kita.`,
+      textEn: `That fierce look in your eyes... it's the exact reason I can never look away from you. But remember: our enemies are waiting for a single misstep.`,
+      textId: `Tatapan kamu yang nggak mau kalah itu... jujur selalu bikin aku susah buat berpaling. Tapi inget ya: musuh kita lagi nunggu satu kesalahan kecil aja dari kita.`,
     },
     {
       speakerEn: "Protagonist",
       speakerId: "Protagonis",
       expr: "happy",
       pos: "left" as const,
-      textEn: `Then let them watch. If they want a war over "${titleEn}", we will give them a masterclass in how to win.`,
-      textId: `Biarkan saja mereka menonton. Jika mereka menginginkan persaingan di "${title}", kita akan tunjukkan bagaimana caranya menang.`,
+      textEn: `Then let them watch. If they want to play games over "${titleEn}", we'll show them how it's done.`,
+      textId: `Biarin aja mereka ngeliatin. Kalau mereka emang mau main api di "${title}", kita buktiin siapa yang bakal menang.`,
     },
     {
       speakerEn: heroEn,
@@ -1014,33 +1014,33 @@ function buildBespokeDialogueArcs(config: any, ep: any, epNum: number) {
       charSlug: config.heroSlug,
       expr: "happy",
       pos: "right" as const,
-      textEn: `Step closer. Before they arrive, I need to know where your heart truly stands. Are you with me purely out of necessity, or is there something more?`,
-      textId: `Mendekatlah ke sini. Sebelum mereka tiba, aku harus tahu di mana hatimu sebenarnya berpihak. Apakah kamu bersamaku hanya karena terpaksa, atau ada hal lain?`,
+      textEn: `Come closer. Before they arrive, I want to hear it straight from you... Are you standing by me just for the deal, or is there something real between us?`,
+      textId: `Mendekat ke sini sebentar. Sebelum mereka dateng, aku mau denger langsung dari kamu... Kamu ada di sampingku cuma karena terpaksa, atau emang ada rasa lain?`,
       sfx: "heartbeat",
     },
   ];
 
   // 3. High Stakes Choice Prompt
   const choicePromptEn = `In the decisive moment of "${titleEn}", how will you answer ${heroEn}?`;
-  const choicePromptId = `Di momen genting "${title}", bagaimana kamu menjawab ${hero}?`;
+  const choicePromptId = `Di momen genting "${title}", gimana caramu ngejawab ${hero}?`;
 
   const choiceA = {
     textEn: `Stay composed, maintain strategic discipline, and reaffirm the plan (+Trust)`,
-    textId: `Tetap tenang, jaga ketegasan strategi, dan pertegas komitmen kita (+Kepercayaan)`,
+    textId: `Tetap tenang, jaga wibawa, dan pertegas rencana kita (+Kepercayaan)`,
     statKey: "REPUTATION",
     statAmount: 15,
     relChar: config.heroSlug,
     relType: "trust" as const,
     relAmount: 15,
     replyEn: `${heroEn} smiles with deep respect, his fingers brushing yours. "Your sharp intellect is our greatest weapon. Let's execute the next phase."`,
-    replyId: `${hero} tersenyum dengan rasa hormat mendalam, jemarinya menyentuh tanganmu pelan. "Kecerdasanmu adalah kekuatan terbesar kita. Mari kita jalankan rencana selanjutnya."`,
+    replyId: `${hero} tersenyum tipis penuh rasa kagum, jemarinya menyentuh tanganmu pelan. "Kecerdasan kamu emang senjata terbaik kita. Yuk kita lanjutin rencana berikutnya."`,
     reply2En: `You both stand shoulder to shoulder, radiating undeniable authority and unbroken confidence.`,
-    reply2Id: `Kalian berdua berdiri berdampingan, memancarkan aura wibawa yang tak tertandingi dan keyakinan tak tergoyahkan.`,
+    reply2Id: `Kalian berdua berdiri berdampingan dengan percaya diri, bikin siapa pun yang ngeliat bakal segan.`,
   };
 
   const choiceB = {
     textEn: `Step close, hold his gaze, and whisper your true feelings (💎 10 Diamonds)`,
-    textId: `Melangkah mendekat, tatap matanya lekat, dan bisikkan isi hatimu (💎 10 Diamond)`,
+    textId: `Maju lebih dekat, tatap matanya, dan bisikkan isi hatimu (💎 10 Diamond)`,
     diamondCost: 10,
     statKey: "LOVE",
     statAmount: 25,
@@ -1048,9 +1048,9 @@ function buildBespokeDialogueArcs(config: any, ep: any, epNum: number) {
     relType: "love" as const,
     relAmount: 30,
     replyEn: `${heroEn}'s eyes darken with intense passion as he pulls you into his arms, his warm breath sending shivers down your spine. "I was hoping you'd say that..."`,
-    replyId: `Tatapan ${hero} melembut penuh gairah saat ia merengkuhmu erat ke dalam dekapannya yang hangat, membuat jantungmu berdegup kencang. "Aku sudah lama menunggu kamu mengatakan itu..."`,
+    replyId: `Napas ${hero} tertahan saat jarak wajah kalian tinggal beberapa senti. Tangannya merengkuh pinggangmu pelan dan hangat. "Dari tadi aku nungguin kamu ngomong gitu..."`,
     reply2En: `For a breathless moment, the entire world fades away, leaving only the fierce beat of two hearts beating as one.`,
-    reply2Id: `Untuk beberapa detik yang mendebarkan, seisi dunia seolah lenyap, hanya menyisakan debaran dua hati yang berpadu menjadi satu.`,
+    reply2Id: `Untuk sesaat, dunia di sekitar kalian berasa lenyap, cuma ada detak jantung kalian berdua yang makin kencang.`,
   };
 
   // 4. Climax Confrontation
@@ -1062,7 +1062,7 @@ function buildBespokeDialogueArcs(config: any, ep: any, epNum: number) {
       expr: "angry",
       pos: "center" as const,
       textEn: `Did you honestly believe you could hide the secret of "${titleEn}" from me?! This game is far from over!`,
-      textId: `Kalian pikir bisa menyembunyikan rahasia di balik "${title}" dariku?! Permainan ini belum selesai!`,
+      textId: `Maksud kalian apa, hah?! Kalian pikir bisa nyembunyiin rahasia soal "${title}" dari aku selamanya?!`,
       sfx: "door_slam",
     },
     {
@@ -1072,7 +1072,7 @@ function buildBespokeDialogueArcs(config: any, ep: any, epNum: number) {
       expr: "determined",
       pos: "right" as const,
       textEn: `Step back, ${rivalEn}. You have no power here anymore. Touch them, and you'll answer to me.`,
-      textId: `Mundurlah, ${rival}. Kamu tidak punya kekuasaan lagi di sini. Sentuh dia, dan kamu harus berhadapan denganku.`,
+      textId: `Mending kamu mundur, ${rival}. Kamu udah nggak punya hak apa-apa lagi di sini. Berani sentuh dia, urusannya bakal panjang sama aku.`,
       sfx: "stat_up",
     },
   ];
@@ -1083,8 +1083,8 @@ function buildBespokeDialogueArcs(config: any, ep: any, epNum: number) {
     : `A sudden revelation at the end of ${titleEn} threatens everything. What will unfold in Episode ${epNum + 1}?`;
 
   const cliffhangerId = epNum === 16
-    ? `Tirai ${drama} ditutup dengan akhir kisah yang spektakuler dan tak terlupakan!`
-    : `Sebuah pengungkapan mengejutkan di akhir ${title} mengancam segalanya. Apa yang akan terjadi di Episode ${epNum + 1}?`;
+    ? `Tirai kisah ${drama} resmi ditutup dengan akhir cinta yang luar biasa manis dan tak terlupakan!`
+    : `Layar ponsel mendadak menyala menampilkan rahasia tak terduga di balik ${title}. Apa yang bakal terjadi di Episode ${epNum + 1}?`;
 
   return {
     number: epNum,
