@@ -207,46 +207,72 @@ export const DialogueBox: React.FC<DialogueBoxProps> = ({
                 }}
               >
                 <svg viewBox="0 0 200 200" className="w-full h-full">
+                  <defs>
+                    <linearGradient id={`mini-skin-${speaker}`} x1="0%" y1="0%" x2="0%" y2="100%">
+                      <stop offset="0%" stopColor="#FFF2E8" />
+                      <stop offset="100%" stopColor="#FDDEC2" />
+                    </linearGradient>
+                    <linearGradient id={`mini-hair-${speaker}`} x1="0%" y1="0%" x2="0%" y2="100%">
+                      <stop offset="0%" stopColor={palette?.hair || "#1E293B"} />
+                      <stop offset="100%" stopColor="#09090B" />
+                    </linearGradient>
+                  </defs>
                   {/* Head skin */}
-                  <circle cx="100" cy="100" r="60" fill="#FDDEC2" />
-                  {/* Hair */}
+                  <circle cx="100" cy="102" r="55" fill={`url(#mini-skin-${speaker})`} stroke="#8C4E2D" strokeWidth="1" />
+                  {/* Soft Blush */}
+                  <ellipse cx="80" cy="115" rx="8" ry="4" fill="#F43F5E" fillOpacity="0.35" />
+                  <ellipse cx="120" cy="115" rx="8" ry="4" fill="#F43F5E" fillOpacity="0.35" />
+                  {/* Hair Base */}
                   <path
                     d={
                       isFemale
-                        ? "M 50 90 C 50 30 150 30 150 90 C 145 60 120 50 100 50 C 80 50 55 60 50 90 Z"
-                        : "M 55 90 C 55 40 145 40 145 90 C 140 60 125 50 100 50 C 75 50 60 60 55 90 Z"
+                        ? "M 48 95 C 48 30 152 30 152 95 C 145 60 120 48 100 48 C 80 48 55 60 48 95 Z"
+                        : "M 52 95 C 52 35 148 35 148 95 C 140 55 125 45 100 45 C 75 45 60 55 52 95 Z"
                     }
-                    fill={palette?.hair || "#1E293B"}
+                    fill={`url(#mini-hair-${speaker})`}
                   />
+                  {/* Hair Highlight */}
+                  <ellipse cx="100" cy="55" rx="22" ry="5" fill="#FFFFFF" fillOpacity="0.3" />
                   {/* Eyes blinking */}
                   <motion.g
-                    animate={{ scaleY: [1, 1, 0.1, 1] }}
+                    animate={{ scaleY: [1, 1, 0.08, 1] }}
                     transition={{ repeat: Infinity, duration: 3.5, times: [0, 0.92, 0.96, 1] }}
-                    style={{ originY: "95px", originX: "100px" }}
+                    style={{ originY: "98px", originX: "100px" }}
                   >
-                    <circle cx="80" cy="95" r="7" fill={palette?.eyes || "#0F172A"} />
-                    <circle cx="120" cy="95" r="7" fill={palette?.eyes || "#0F172A"} />
-                    <circle cx="82" cy="93" r="2.5" fill="#FFFFFF" />
-                    <circle cx="122" cy="93" r="2.5" fill="#FFFFFF" />
+                    <ellipse cx="80" cy="98" rx="7" ry="6" fill="#FFFFFF" />
+                    <circle cx="80" cy="98" r="5.5" fill={palette?.eyes || "#0F172A"} />
+                    <circle cx="80" cy="98" r="3" fill="#09090B" />
+                    <circle cx="81.5" cy="96.5" r="1.8" fill="#FFFFFF" />
+
+                    <ellipse cx="120" cy="98" rx="7" ry="6" fill="#FFFFFF" />
+                    <circle cx="120" cy="98" r="5.5" fill={palette?.eyes || "#0F172A"} />
+                    <circle cx="120" cy="98" r="3" fill="#09090B" />
+                    <circle cx="121.5" cy="96.5" r="1.8" fill="#FFFFFF" />
+
+                    {/* Eyelashes / Eye Line */}
+                    <path d="M 72 95 Q 80 91 89 95" stroke="#0F172A" strokeWidth="2" strokeLinecap="round" fill="none" />
+                    <path d="M 111 95 Q 120 91 128 95" stroke="#0F172A" strokeWidth="2" strokeLinecap="round" fill="none" />
                   </motion.g>
                   {/* Eyebrows */}
-                  <path d="M 72 82 L 88 85" stroke="#0F172A" strokeWidth="2.5" strokeLinecap="round" />
-                  <path d="M 112 85 L 128 82" stroke="#0F172A" strokeWidth="2.5" strokeLinecap="round" />
+                  <path d="M 72 88 L 88 91" stroke="#0F172A" strokeWidth="2" strokeLinecap="round" />
+                  <path d="M 112 91 L 128 88" stroke="#0F172A" strokeWidth="2" strokeLinecap="round" />
                   {/* Nose */}
-                  <path d="M 98 102 L 102 110 L 98 111" stroke="#A86B43" strokeWidth="1.5" strokeLinecap="round" />
+                  <path d="M 99 105 L 101 111 L 98 112" stroke="#A86B43" strokeWidth="1.2" strokeLinecap="round" fill="none" />
                   {/* Animated mouth speaking */}
                   {isTyping ? (
                     <motion.ellipse
                       cx="100"
-                      cy="125"
-                      rx="7"
-                      ry="5"
+                      cy="126"
+                      rx="6.5"
+                      ry="4.5"
                       fill="#881337"
-                      animate={{ ry: [2, 6, 2, 5, 2] }}
+                      stroke="#4C0519"
+                      strokeWidth="1"
+                      animate={{ ry: [2, 5.5, 2, 4.5, 2] }}
                       transition={{ repeat: Infinity, duration: 0.35, ease: "easeInOut" }}
                     />
                   ) : (
-                    <path d="M 92 124 Q 100 128 108 124" stroke="#881337" strokeWidth="2" strokeLinecap="round" fill="none" />
+                    <path d="M 93 125 Q 100 128 107 125" stroke="#9F1239" strokeWidth="1.8" strokeLinecap="round" fill="none" />
                   )}
                 </svg>
               </div>
