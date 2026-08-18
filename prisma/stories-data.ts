@@ -946,30 +946,6 @@ const BESPOKE_STORIES_CONFIG: Array<{
   },
 ];
 
-export function getAll20NewStories(): StoryDefinition[] {
-  return BESPOKE_STORIES_CONFIG.map((config, sIdx) => {
-    const isMusicDrama = config.genres.includes("Music") || config.tags.some(t => t.toLowerCase().includes("idol"));
-    const isRevengeDrama = config.genres.includes("Revenge") || config.genres.includes("Thriller");
-    const isChaebolDrama = config.tags.some(t => t.toLowerCase().includes("ceo") || t.toLowerCase().includes("chaebol") || t.toLowerCase().includes("contract"));
-
-    const episodeArcs = config.episodes.map((ep, i) => {
-      const epNum = i + 1;
-      const coinPrice = epNum <= 3 ? 0 : epNum <= 7 ? 10 : epNum <= 12 ? 15 : epNum <= 15 ? 20 : 25;
-      const unlockType = epNum <= 3 ? "FREE" : "COIN_LOCKED";
-
-      // Select atmospheric location based on episode stage & drama type
-      const bgSlug =
-        epNum === 1 || epNum === 5 || epNum === 9 ? "penthouse" :
-        epNum === 2 || epNum === 6 || epNum === 13 ? (isMusicDrama ? "office" : "boardroom") :
-        epNum === 3 || epNum === 8 || epNum === 14 ? "rain_street" :
-        epNum === 4 || epNum === 10 || epNum === 15 ? "ballroom" :
-        epNum === 7 || epNum === 11 ? "bedroom" : "office";
-
-      const bgMusic =
-        epNum % 4 === 1 ? "romantic" :
-        epNum % 4 === 2 ? "tense" :
-        epNum % 4 === 3 ? "dramatic" : "mystery";
-
 function buildBespokeDialogueArcs(config: any, ep: any, epNum: number) {
   const hero = config.heroId;
   const heroEn = config.heroEn;
