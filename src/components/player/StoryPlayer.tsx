@@ -781,6 +781,7 @@ export const StoryPlayer: React.FC<StoryPlayerProps> = ({
             backgroundEffect={backgroundEffect}
             activeCharacters={activeCharacters}
             overlayEffect={overlayEffect}
+            activeSpeakerSlug={currentNode?.type === "DIALOGUE" ? currentNode?.config?.characterSlug : undefined}
           />
         </div>
 

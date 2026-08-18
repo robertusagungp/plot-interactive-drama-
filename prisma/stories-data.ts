@@ -970,335 +970,169 @@ export function getAll20NewStories(): StoryDefinition[] {
         epNum % 4 === 2 ? "tense" :
         epNum % 4 === 3 ? "dramatic" : "mystery";
 
-      // Tailored multi-beat dialogues tailored to episode title & drama lore
-      let dialogues: any[] = [];
-      let choicePromptEn = "";
-      let choicePromptId = "";
-      let choiceA: any = {};
-      let choiceB: any = {};
-      let climaxDialogues: any[] = [];
-      let cliffhangerEn = "";
-      let cliffhangerId = "";
+function buildBespokeDialogueArcs(config: any, ep: any, epNum: number) {
+  const hero = config.heroId;
+  const heroEn = config.heroEn;
+  const rival = config.rivalId;
+  const rivalEn = config.rivalEn;
+  const title = ep.titleId;
+  const titleEn = ep.titleEn;
+  const synopsis = ep.synopsisId;
+  const synopsisEn = ep.synopsisEn;
+  const drama = config.titleId;
+  const dramaEn = config.titleEn;
 
-      if (epNum === 1) {
-        dialogues = [
-          {
-            speakerEn: config.heroEn,
-            speakerId: config.heroId,
-            charSlug: config.heroSlug,
-            expr: "smirk",
-            pos: "right" as const,
-            textEn: `Look at this document. By tomorrow morning, the entire city will know about us. Are you prepared for the consequences?`,
-            textId: `Lihat dokumen ini. Besok pagi, seisi kota akan membicarakan kita. Apakah kamu sudah siap dengan konsekuensinya?`,
-            sfx: "heartbeat",
-          },
-          {
-            speakerEn: "Protagonist",
-            speakerId: "Protagonis",
-            expr: "determined",
-            pos: "left" as const,
-            textEn: `I knew what I was signing up for. I didn't come this far just to back down now.`,
-            textId: `Aku tahu apa yang aku tandatangani. Aku tidak melangkah sejauh ini hanya untuk mundur karena takut.`,
-          },
-          {
-            speakerEn: config.heroEn,
-            speakerId: config.heroId,
-            charSlug: config.heroSlug,
-            expr: "normal",
-            pos: "right" as const,
-            textEn: `Good. In my world, hesitation is fatal. Rule number one: never let anyone see what you're thinking. Especially them.`,
-            textId: `Bagus. Di duniaku, keraguan adalah kelemahan fatal. Aturan nomor satu: jangan biarkan siapapun membaca pikiranmu. Terutama mereka.`,
-          },
-        ];
+  // 1. Contextual Location & Audio
+  const bgSlug =
+    epNum === 1 || epNum === 5 || epNum === 9 ? "penthouse" :
+    epNum === 2 || epNum === 6 || epNum === 13 ? "boardroom" :
+    epNum === 3 || epNum === 8 || epNum === 14 ? "rain_street" :
+    epNum === 4 || epNum === 10 || epNum === 15 ? "ballroom" :
+    epNum === 7 || epNum === 11 ? "bedroom" : "office";
 
-        choicePromptEn = `How do you respond to ${config.heroEn}'s warning in "${ep.titleEn}"?`;
-        choicePromptId = `Bagaimana sikapmu menghadapi peringatan ${config.heroId} di "${ep.titleId}"?`;
+  const bgMusic =
+    epNum % 4 === 1 ? "romantic" :
+    epNum % 4 === 2 ? "tense" :
+    epNum % 4 === 3 ? "dramatic" : "mystery";
 
-        choiceA = {
-          textEn: "Maintain cool professional composure and accept his terms",
-          textId: "Tetap tenang secara profesional dan terima ketentuannya",
-          statKey: "REPUTATION",
-          statAmount: 10,
-          relChar: config.heroSlug,
-          relType: "trust" as const,
-          relAmount: 10,
-          replyEn: `${config.heroEn} nods with genuine approval. "I respect someone who keeps a cool head."`,
-          replyId: `${config.heroId} mengangguk puas. "Aku menghargai orang yang tetap berkepala dingin."`,
-        };
+  // 2. Rich Multi-Turn Dialogues Tailored to Exact Episode
+  const dialogues = [
+    {
+      speakerEn: heroEn,
+      speakerId: hero,
+      charSlug: config.heroSlug,
+      expr: epNum % 2 === 0 ? "normal" : "smirk",
+      pos: "right" as const,
+      textEn: `We're at the turning point of "${titleEn}". Look at what happened with ${synopsisEn.toLowerCase()} Everything we planned is being tested right now.`,
+      textId: `Kita berada di titik penentuan dalam "${title}". Lihat apa yang terjadi mengenai ${synopsis.toLowerCase()} Semua yang kita rencanakan sedang diuji saat ini.`,
+      sfx: epNum % 3 === 0 ? "camera_flash" : "heartbeat",
+    },
+    {
+      speakerEn: "Protagonist",
+      speakerId: "Protagonis",
+      expr: "determined",
+      pos: "left" as const,
+      textEn: `I'm not backing down, ${heroEn}. We came into this together, and I intend to see it through to the end.`,
+      textId: `Aku tidak akan mundur, ${hero}. Kita melangkah ke dalam situasi ini bersama, dan aku akan menghadapinya sampai tuntas.`,
+    },
+    {
+      speakerEn: heroEn,
+      speakerId: hero,
+      charSlug: config.heroSlug,
+      expr: epNum % 3 === 0 ? "happy" : "smirk",
+      pos: "right" as const,
+      textEn: `That fierce look in your eyes... it's the reason I can't look away from you. But listen closely: our enemies are watching our every move.`,
+      textId: `Tatapan tajam di matamu itu... itulah alasan aku tidak pernah bisa berpaling darimu. Tapi dengarkan baik-baik: musuh kita sedang mengawasi setiap langkah kita.`,
+    },
+    {
+      speakerEn: "Protagonist",
+      speakerId: "Protagonis",
+      expr: "happy",
+      pos: "left" as const,
+      textEn: `Then let them watch. If they want a war over "${titleEn}", we will give them a masterclass in how to win.`,
+      textId: `Biarkan saja mereka menonton. Jika mereka menginginkan persaingan di "${title}", kita akan tunjukkan bagaimana caranya menang.`,
+    },
+    {
+      speakerEn: heroEn,
+      speakerId: hero,
+      charSlug: config.heroSlug,
+      expr: "happy",
+      pos: "right" as const,
+      textEn: `Step closer. Before they arrive, I need to know where your heart truly stands. Are you with me purely out of necessity, or is there something more?`,
+      textId: `Mendekatlah ke sini. Sebelum mereka tiba, aku harus tahu di mana hatimu sebenarnya berpihak. Apakah kamu bersamaku hanya karena terpaksa, atau ada hal lain?`,
+      sfx: "heartbeat",
+    },
+  ];
 
-        choiceB = {
-          textEn: "Step boldly forward and look deep into his eyes (💎 Premium)",
-          textId: "Melangkah maju dengan berani dan tatap matanya lekat-lekat (💎 Spesial)",
-          diamondCost: 10,
-          statKey: "LOVE",
-          statAmount: 15,
-          relChar: config.heroSlug,
-          relType: "love" as const,
-          relAmount: 20,
-          replyEn: `${config.heroEn}'s breath hitches as your faces draw inches apart. "You're more dangerous than I thought..."`,
-          replyId: `Napas ${config.heroId} tertahan saat wajah kalian berjarak begitu dekat. "Kamu ternyata lebih berbahaya dari dugaanku..."`,
-        };
+  // 3. High Stakes Choice Prompt
+  const choicePromptEn = `In the decisive moment of "${titleEn}", how will you answer ${heroEn}?`;
+  const choicePromptId = `Di momen genting "${title}", bagaimana kamu menjawab ${hero}?`;
 
-        climaxDialogues = [
-          {
-            speakerEn: config.rivalEn,
-            speakerId: config.rivalId,
-            charSlug: config.rivalSlug,
-            expr: "angry",
-            pos: "center" as const,
-            textEn: `What is the meaning of this?! You can't keep this hidden from me forever!`,
-            textId: `Apa maksud semua ini?! Kalian tidak akan bisa menyembunyikan rahasia ini dariku selamanya!`,
-            sfx: "door_slam",
-          },
-        ];
+  const choiceA = {
+    textEn: `Stay composed, maintain strategic discipline, and reaffirm the plan (+Trust)`,
+    textId: `Tetap tenang, jaga ketegasan strategi, dan pertegas komitmen kita (+Kepercayaan)`,
+    statKey: "REPUTATION",
+    statAmount: 15,
+    relChar: config.heroSlug,
+    relType: "trust" as const,
+    relAmount: 15,
+    replyEn: `${heroEn} smiles with deep respect, his fingers brushing yours. "Your sharp intellect is our greatest weapon. Let's execute the next phase."`,
+    replyId: `${hero} tersenyum dengan rasa hormat mendalam, jemarinya menyentuh tanganmu pelan. "Kecerdasanmu adalah kekuatan terbesar kita. Mari kita jalankan rencana selanjutnya."`,
+    reply2En: `You both stand shoulder to shoulder, radiating undeniable authority and unbroken confidence.`,
+    reply2Id: `Kalian berdua berdiri berdampingan, memancarkan aura wibawa yang tak tertandingi dan keyakinan tak tergoyahkan.`,
+  };
 
-        cliffhangerEn = `A sudden knock at midnight shatters the silence. The game has officially begun...`;
-        cliffhangerId = `Ketukan pintu di tengah malam memecah keheningan. Permainan berbahaya ini resmi dimulai...`;
-      } else if (epNum <= 6) {
-        dialogues = [
-          {
-            speakerEn: config.heroEn,
-            speakerId: config.heroId,
-            charSlug: config.heroSlug,
-            expr: "normal",
-            pos: "right" as const,
-            textEn: `The media is already outside. Regarding "${ep.titleEn}"—they're waiting for us to make a single mistake.`,
-            textId: `Wartawan sudah menunggu di luar. Mengenai "${ep.titleId}"—mereka hanya menunggu kita melakukan satu kesalahan kecil.`,
-            sfx: "camera_flash",
-          },
-          {
-            speakerEn: "Protagonist",
-            speakerId: "Protagonis",
-            expr: "happy",
-            pos: "left" as const,
-            textEn: `Then we won't give them one. We act our part flawlessly.`,
-            textId: `Kalau begitu kita tidak akan memberi mereka celah. Kita mainkan peran kita dengan sempurna.`,
-          },
-          {
-            speakerEn: config.heroEn,
-            speakerId: config.heroId,
-            charSlug: config.heroSlug,
-            expr: "smirk",
-            pos: "right" as const,
-            textEn: `Is it still just an act to you? Because every time you're this close, it stops feeling like a game.`,
-            textId: `Apakah ini masih terasa seperti akting bagimu? Karena setiap kali kamu sedekat ini, rasanya tidak lagi seperti sandiwara.`,
-            sfx: "heartbeat",
-          },
-        ];
+  const choiceB = {
+    textEn: `Step close, hold his gaze, and whisper your true feelings (💎 10 Diamonds)`,
+    textId: `Melangkah mendekat, tatap matanya lekat, dan bisikkan isi hatimu (💎 10 Diamond)`,
+    diamondCost: 10,
+    statKey: "LOVE",
+    statAmount: 25,
+    relChar: config.heroSlug,
+    relType: "love" as const,
+    relAmount: 30,
+    replyEn: `${heroEn}'s eyes darken with intense passion as he pulls you into his arms, his warm breath sending shivers down your spine. "I was hoping you'd say that..."`,
+    replyId: `Tatapan ${hero} melembut penuh gairah saat ia merengkuhmu erat ke dalam dekapannya yang hangat, membuat jantungmu berdegup kencang. "Aku sudah lama menunggu kamu mengatakan itu..."`,
+    reply2En: `For a breathless moment, the entire world fades away, leaving only the fierce beat of two hearts beating as one.`,
+    reply2Id: `Untuk beberapa detik yang mendebarkan, seisi dunia seolah lenyap, hanya menyisakan debaran dua hati yang berpadu menjadi satu.`,
+  };
 
-        choicePromptEn = `How do you handle the rising tension in "${ep.titleEn}"?`;
-        choicePromptId = `Bagaimana kamu menyikapi ketegangan yang kian memuncak di "${ep.titleId}"?`;
+  // 4. Climax Confrontation
+  const climaxDialogues = [
+    {
+      speakerEn: rivalEn,
+      speakerId: rival,
+      charSlug: config.rivalSlug,
+      expr: "angry",
+      pos: "center" as const,
+      textEn: `Did you honestly believe you could hide the secret of "${titleEn}" from me?! This game is far from over!`,
+      textId: `Kalian pikir bisa menyembunyikan rahasia di balik "${title}" dariku?! Permainan ini belum selesai!`,
+      sfx: "door_slam",
+    },
+    {
+      speakerEn: heroEn,
+      speakerId: hero,
+      charSlug: config.heroSlug,
+      expr: "determined",
+      pos: "right" as const,
+      textEn: `Step back, ${rivalEn}. You have no power here anymore. Touch them, and you'll answer to me.`,
+      textId: `Mundurlah, ${rival}. Kamu tidak punya kekuasaan lagi di sini. Sentuh dia, dan kamu harus berhadapan denganku.`,
+      sfx: "stat_up",
+    },
+  ];
 
-        choiceA = {
-          textEn: "Remind him of the contract and focus on the strategic plan",
-          textId: "Ingatkan dia pada batas kesepakatan dan fokus pada strategi",
-          statKey: "REPUTATION",
-          statAmount: 10,
-          relChar: config.heroSlug,
-          relType: "trust" as const,
-          relAmount: 15,
-          replyEn: `${config.heroEn} smirks faintly, regaining his composed demeanor. "Always sharp. That's why I need you."`,
-          replyId: `${config.heroId} tersenyum tipis, kembali tenang. "Selalu tajam. Itulah alasan aku membutuhkanmu."`,
-        };
+  // 5. Cliffhanger Hook
+  const cliffhangerEn = epNum === 16
+    ? `The curtains close on ${dramaEn} with an unforgettable, breathtaking grand finale!`
+    : `A sudden revelation at the end of ${titleEn} threatens everything. What will unfold in Episode ${epNum + 1}?`;
 
-        choiceB = {
-          textEn: "Gently adjust his collar and whisper a secret (💎 Premium)",
-          textId: "Rapikan kerah bajunya dengan lembut dan bisikkan rahasia (💎 Spesial)",
-          diamondCost: 10,
-          statKey: "LOVE",
-          statAmount: 20,
-          relChar: config.heroSlug,
-          relType: "love" as const,
-          relAmount: 25,
-          replyEn: `${config.heroEn} grips your waist gently, his eyes burning with unspoken desire. "Don't tempt me."`,
-          replyId: `${config.heroId} merengkuh pinggangmu pelan, tatapannya menyala penuh gairah. "Jangan memancingku..."`,
-        };
+  const cliffhangerId = epNum === 16
+    ? `Tirai ${drama} ditutup dengan akhir kisah yang spektakuler dan tak terlupakan!`
+    : `Sebuah pengungkapan mengejutkan di akhir ${title} mengancam segalanya. Apa yang akan terjadi di Episode ${epNum + 1}?`;
 
-        climaxDialogues = [
-          {
-            speakerEn: config.rivalEn,
-            speakerId: config.rivalId,
-            charSlug: config.rivalSlug,
-            expr: "angry",
-            pos: "center" as const,
-            textEn: `I found the evidence. When the press gets hold of this, both of your reputations will burn to ashes!`,
-            textId: `Aku sudah memegang buktinya. Saat media mendapatkan ini, reputasi kalian berdua akan hancur lebur!`,
-            sfx: "door_slam",
-          },
-        ];
+  return {
+    number: epNum,
+    title: titleEn,
+    titleId: title,
+    synopsis: synopsisEn,
+    synopsisId: synopsis,
+    bgSlug,
+    bgMusic,
+    dialogues,
+    choicePromptEn,
+    choicePromptId,
+    choiceA,
+    choiceB,
+    climaxDialogues,
+    cliffhangerEn,
+    cliffhangerId,
+  };
+}
 
-        cliffhangerEn = `A phone screen lights up with leaked confidential photos. What will happen next?`;
-        cliffhangerId = `Layar ponsel menyala menampilkan foto rahasia yang bocor. Apa yang akan terjadi selanjutnya?`;
-      } else if (epNum <= 11) {
-        dialogues = [
-          {
-            speakerEn: config.heroEn,
-            speakerId: config.heroId,
-            charSlug: config.heroSlug,
-            expr: "angry",
-            pos: "right" as const,
-            textEn: `They've crossed the line. This isn't just about business or fame anymore. They're targeting you directly.`,
-            textId: `Mereka sudah keterlaluan. Ini bukan lagi soal bisnis atau popularitas. Mereka mengincar dirimu secara langsung.`,
-            sfx: "thunder",
-          },
-          {
-            speakerEn: "Protagonist",
-            speakerId: "Protagonis",
-            expr: "determined",
-            pos: "left" as const,
-            textEn: `I'm not afraid of them, ${config.heroId}. As long as you're standing with me, we can weather any storm.`,
-            textId: `Aku tidak takut pada mereka, ${config.heroId}. Selama kamu berdiri di sampingku, kita bisa menghadapi badai ini.`,
-          },
-          {
-            speakerEn: config.heroEn,
-            speakerId: config.heroId,
-            charSlug: config.heroSlug,
-            expr: "happy",
-            pos: "right" as const,
-            textEn: `I won't let a single person hurt you. I promise on everything I own.`,
-            textId: `Aku tidak akan membiarkan satu orang pun menyakitimu. Aku bersumpah demi semua yang kumiliki.`,
-            sfx: "heartbeat",
-          },
-        ];
-
-        choicePromptEn = `What decision will you make in "${ep.titleEn}"?`;
-        choicePromptId = `Keputusan apa yang akan kamu ambil di "${ep.titleId}"?`;
-
-        choiceA = {
-          textEn: "Propose a bold public counter-statement to expose the lies",
-          textId: "Usulkan klarifikasi publik yang berani untuk membongkar fitnah",
-          statKey: "REPUTATION",
-          statAmount: 15,
-          relChar: config.heroSlug,
-          relType: "trust" as const,
-          relAmount: 15,
-          replyEn: `${config.heroEn} smiles with pride. "Brilliant. Let's turn their own trap against them."`,
-          replyId: `${config.heroId} tersenyum bangga. "Brilian. Mari kita balikkan jebakan mereka sendiri."`,
-        };
-
-        choiceB = {
-          textEn: "Embrace him in the storm and promise never to let go (💎 Premium)",
-          textId: "Peluk dia di tengah badai dan berjanjilah takkan pernah melepaskannya (💎 Spesial)",
-          diamondCost: 10,
-          statKey: "LOVE",
-          statAmount: 25,
-          relChar: config.heroSlug,
-          relType: "love" as const,
-          relAmount: 30,
-          replyEn: `${config.heroEn} buries his face in your shoulder, holding you as if you are his entire world.`,
-          replyId: `${config.heroId} membenamkan wajahnya di bahumu, mendekapmu seolah kamu adalah seluruh dunianya.`,
-        };
-
-        climaxDialogues = [
-          {
-            speakerEn: config.rivalEn,
-            speakerId: config.rivalId,
-            charSlug: config.rivalSlug,
-            expr: "angry",
-            pos: "center" as const,
-            textEn: `You think love can protect you in this city? The final vote is tomorrow morning!`,
-            textId: `Kalian pikir cinta bisa melindungi kalian di kota ini? Keputusan akhir ditentukan besok pagi!`,
-            sfx: "door_slam",
-          },
-        ];
-
-        cliffhangerEn = `A sudden blackout plunges the building into darkness. Footsteps echo in the hallway...`;
-        cliffhangerId = `Listrik padam mendadak menenggelamkan ruangan dalam kegelapan. Suara langkah kaki mendekat...`;
-      } else {
-        // Episodes 12-16: Grand Climax
-        dialogues = [
-          {
-            speakerEn: config.heroEn,
-            speakerId: config.heroId,
-            charSlug: config.heroSlug,
-            expr: "normal",
-            pos: "right" as const,
-            textEn: `Everything we've fought for leads to this moment. In "${ep.titleEn}", the truth finally comes to light.`,
-            textId: `Semua yang kita perjuangkan bermuara pada detik ini. Di "${ep.titleId}", kebenaran akhirnya terungkap.`,
-            sfx: "camera_flash",
-          },
-          {
-            speakerEn: "Protagonist",
-            speakerId: "Protagonis",
-            expr: "happy",
-            pos: "left" as const,
-            textEn: `No more secrets. No more fake smiles. We show them who we truly are.`,
-            textId: `Tidak ada lagi rahasia. Tidak ada lagi senyum palsu. Kita tunjukkan siapa kita sebenarnya.`,
-          },
-          {
-            speakerEn: config.heroEn,
-            speakerId: config.heroId,
-            charSlug: config.heroSlug,
-            expr: "happy",
-            pos: "right" as const,
-            textEn: `Whatever happens next, my heart belongs completely to you.`,
-            textId: `Apapun yang terjadi selanjutnya, hatiku seutuhnya telah menjadi milikmu.`,
-            sfx: "heartbeat",
-          },
-        ];
-
-        choicePromptEn = `How will you seal your destiny in "${ep.titleEn}"?`;
-        choicePromptId = `Bagaimana kamu mengukir takdir cintamu di "${ep.titleId}"?`;
-
-        choiceA = {
-          textEn: "Take the microphone and deliver a triumphant speech to the world",
-          textId: "Ambil mikrofon dan sampaikan pidato kemenangan di hadapan semua orang",
-          statKey: "REPUTATION",
-          statAmount: 20,
-          relChar: config.heroSlug,
-          relType: "trust" as const,
-          relAmount: 20,
-          replyEn: `The crowd erupts into thunderous applause as truth triumphs over deceit!`,
-          replyId: `Seluruh hadirin bersorak riuh saat kebenaran mengalahkan segala tipu daya!`,
-        };
-
-        choiceB = {
-          textEn: "Share a passionate kiss under the flashing lights (💎 Premium)",
-          textId: "Kecup bibirnya dengan penuh cinta di bawah sorotan lampu megah (💎 Spesial)",
-          diamondCost: 10,
-          statKey: "LOVE",
-          statAmount: 30,
-          relChar: config.heroSlug,
-          relType: "love" as const,
-          relAmount: 35,
-          replyEn: `${config.heroEn} pulls you into a breathless, unforgettable kiss that takes the world's breath away.`,
-          replyId: `${config.heroId} menarikmu ke dalam ciuman penuh cinta yang menggetarkan hati dan disaksikan seluruh dunia.`,
-        };
-
-        climaxDialogues = [
-          {
-            speakerEn: config.rivalEn,
-            speakerId: config.rivalId,
-            charSlug: config.rivalSlug,
-            expr: "angry",
-            pos: "center" as const,
-            textEn: `No...! This cannot be happening! My empire... my plans... ruined!`,
-            textId: `Tidak mungkin...! Semua rencanaku... kerajaanku... hancur lebur!`,
-            sfx: "door_slam",
-          },
-        ];
-
-        cliffhangerEn = epNum === 16 ? `Your journey reaches its breathtaking grand finale!` : `The final countdown begins. Will love conquer all in the next episode?`;
-        cliffhangerId = epNum === 16 ? `Perjalanan cintamu mencapai puncak grand finale yang memukau!` : `Hitung mundur babak akhir dimulai. Akankah cinta menang di episode berikutnya?`;
-      }
-
-      return {
-        number: epNum,
-        title: ep.titleEn,
-        titleId: ep.titleId,
-        synopsis: ep.synopsisEn,
-        synopsisId: ep.synopsisId,
-        bgSlug,
-        bgMusic,
-        dialogues,
-        choicePromptEn,
-        choicePromptId,
-        choiceA,
-        choiceB,
-        climaxDialogues,
-        cliffhangerEn,
-        cliffhangerId,
-      };
+export function getAll20NewStories(): StoryDefinition[] {
+  return BESPOKE_STORIES_CONFIG.map((config) => {
+    const episodeArcs = config.episodes.map((ep, i) => {
+      return buildBespokeDialogueArcs(config, ep, i + 1);
     });
 
     return {

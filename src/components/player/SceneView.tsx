@@ -13,6 +13,7 @@ interface SceneViewProps {
   backgroundEffect?: MotionPreset;
   activeCharacters: Record<string, PlayerCharacterState>;
   overlayEffect?: MotionPreset;
+  activeSpeakerSlug?: string;
 }
 
 export const SceneView: React.FC<SceneViewProps> = ({
@@ -21,6 +22,7 @@ export const SceneView: React.FC<SceneViewProps> = ({
   backgroundEffect = "none",
   activeCharacters,
   overlayEffect = "none",
+  activeSpeakerSlug,
 }) => {
   const bgData = SCENE_BACKGROUNDS[backgroundSlug] || SCENE_BACKGROUNDS.penthouse;
 
@@ -181,6 +183,7 @@ export const SceneView: React.FC<SceneViewProps> = ({
                   expression={char.expression}
                   position="left"
                   customAvatarUrl={char.avatarUrl}
+                  isSpeaking={char.slug === activeSpeakerSlug}
                 />
               </motion.div>
             ))}
@@ -205,6 +208,7 @@ export const SceneView: React.FC<SceneViewProps> = ({
                   expression={char.expression}
                   position="center"
                   customAvatarUrl={char.avatarUrl}
+                  isSpeaking={char.slug === activeSpeakerSlug}
                 />
               </motion.div>
             ))}
@@ -229,6 +233,7 @@ export const SceneView: React.FC<SceneViewProps> = ({
                   expression={char.expression}
                   position="right"
                   customAvatarUrl={char.avatarUrl}
+                  isSpeaking={char.slug === activeSpeakerSlug}
                 />
               </motion.div>
             ))}

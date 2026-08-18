@@ -253,7 +253,7 @@ async function seedSingleDrama(sDef: any, sIdx: number, total: number, genreMap:
       nextNodeId: null,
     });
 
-    // 5. Branch A Resolution
+    // 5. Branch A Resolution (2 Turns)
     nodesToCreate.push({
       nodeId: `ep${ep.number}_branch_a`,
       nodeIndex: currentIndex++,
@@ -267,10 +267,22 @@ async function seedSingleDrama(sDef: any, sIdx: number, total: number, genreMap:
         expression: "normal",
         position: "right",
       },
-      nextNodeId: `ep${ep.number}_merge`,
+      nextNodeId: `ep${ep.number}_branch_a2`,
     });
 
-    // 6. Branch B Resolution
+    nodesToCreate.push({
+      nodeId: `ep${ep.number}_branch_a2`,
+      nodeIndex: currentIndex++,
+      type: "NARRATION",
+      config: {
+        text: ep.choiceA.reply2En || "You stand firm together, ready for whatever happens next.",
+        textId: ep.choiceA.reply2Id || "Kalian berdiri berdampingan dengan penuh keyakinan menghadapi apa pun yang terjadi.",
+        style: "standard",
+      },
+      nextNodeId: `ep${ep.number}_climax_1`,
+    });
+
+    // 6. Branch B Resolution (2 Turns)
     nodesToCreate.push({
       nodeId: `ep${ep.number}_branch_b`,
       nodeIndex: currentIndex++,
@@ -283,24 +295,54 @@ async function seedSingleDrama(sDef: any, sIdx: number, total: number, genreMap:
         textId: ep.choiceB.replyId,
         expression: "happy",
         position: "right",
+        sfx: "heartbeat",
       },
-      nextNodeId: `ep${ep.number}_merge`,
+      nextNodeId: `ep${ep.number}_branch_b2`,
     });
 
-    // 7. Merged Climax Dialogues
     nodesToCreate.push({
-      nodeId: `ep${ep.number}_merge`,
+      nodeId: `ep${ep.number}_branch_b2`,
+      nodeIndex: currentIndex++,
+      type: "NARRATION",
+      config: {
+        text: ep.choiceB.reply2En || "A breathless romantic spark ignites between you both.",
+        textId: ep.choiceB.reply2Id || "Percikan cinta yang mendebarkan menyala di antara kalian berdua.",
+        style: "internal_thought",
+      },
+      nextNodeId: `ep${ep.number}_climax_1`,
+    });
+
+    // 7. Climax Dialogues
+    nodesToCreate.push({
+      nodeId: `ep${ep.number}_climax_1`,
       nodeIndex: currentIndex++,
       type: "DIALOGUE",
       config: {
         speaker: ep.climaxDialogues[0]?.speakerEn || "Rival",
         speakerId: ep.climaxDialogues[0]?.speakerId || "Rival",
         characterSlug: ep.climaxDialogues[0]?.charSlug || "rival",
-        text: ep.climaxDialogues[0]?.textEn || "This is not over.",
-        textId: ep.climaxDialogues[0]?.textId || "Ini belum berakhir.",
+        text: ep.climaxDialogues[0]?.textEn || "This is not over!",
+        textId: ep.climaxDialogues[0]?.textId || "Ini belum berakhir!",
         expression: "angry",
         position: "center",
         sfx: ep.climaxDialogues[0]?.sfx || "door_slam",
+      },
+      nextNodeId: `ep${ep.number}_climax_2`,
+    });
+
+    nodesToCreate.push({
+      nodeId: `ep${ep.number}_climax_2`,
+      nodeIndex: currentIndex++,
+      type: "DIALOGUE",
+      config: {
+        speaker: ep.climaxDialogues[1]?.speakerEn || ep.dialogues[0]?.speakerEn || "Lead",
+        speakerId: ep.climaxDialogues[1]?.speakerId || ep.dialogues[0]?.speakerId || "Lead",
+        characterSlug: ep.climaxDialogues[1]?.charSlug || ep.dialogues[0]?.charSlug || "lead",
+        text: ep.climaxDialogues[1]?.textEn || "We'll see about that.",
+        textId: ep.climaxDialogues[1]?.textId || "Akan kita buktikan bersama.",
+        expression: "determined",
+        position: "right",
+        sfx: "stat_up",
       },
       nextNodeId: `ep${ep.number}_end`,
     });
