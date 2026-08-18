@@ -79,6 +79,7 @@ export default async function StoryDetailPage({
     titleId: ep.titleId,
     synopsis: ep.synopsis,
     synopsisId: ep.synopsisId,
+    coverImage: ep.coverImage,
     unlockType: ep.unlockType,
     coinPrice: ep.coinPrice,
     isUnlocked: unlockedEpisodeIds.has(ep.id),

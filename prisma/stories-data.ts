@@ -1250,6 +1250,65 @@ function getDramaDialogueContext(slug: string, epNum: number, hero: string, riva
   };
 }
 
+function getEpisodeIllustration(slug: string, epNum: number, bgSlug: string): string {
+  const imagesByGenre: Record<string, string[]> = {
+    corporate: [
+      "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&q=80",
+      "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80",
+      "https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=800&q=80",
+      "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=800&q=80",
+      "https://images.unsplash.com/photo-1590490360182-c33d57733427?w=800&q=80",
+      "https://images.unsplash.com/photo-1497215728101-856f4ea42174?w=800&q=80",
+      "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&q=80",
+      "https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=800&q=80",
+    ],
+    idol: [
+      "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800&q=80",
+      "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=800&q=80",
+      "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&q=80",
+      "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=800&q=80",
+      "https://images.unsplash.com/photo-1465847899084-d164df4dedc6?w=800&q=80",
+      "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&q=80",
+      "https://images.unsplash.com/photo-1538485399081-7191377e8241?w=800&q=80",
+      "https://images.unsplash.com/photo-1520523839898-507127054546?w=800&q=80",
+    ],
+    action: [
+      "https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=800&q=80",
+      "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&q=80",
+      "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=800&q=80",
+      "https://images.unsplash.com/photo-1514565131-fce0801e5785?w=800&q=80",
+      "https://images.unsplash.com/photo-1517816743773-6e0fd518b4a6?w=800&q=80",
+    ],
+    medical: [
+      "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=800&q=80",
+      "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?w=800&q=80",
+      "https://images.unsplash.com/photo-1516549655169-df83a0774514?w=800&q=80",
+      "https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?w=800&q=80",
+    ],
+    fantasy: [
+      "https://images.unsplash.com/photo-1541432901042-2d8bd64b4a9b?w=800&q=80",
+      "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800&q=80",
+      "https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?w=800&q=80",
+      "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800&q=80",
+    ],
+    cafe: [
+      "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=800&q=80",
+      "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=800&q=80",
+      "https://images.unsplash.com/photo-1511920170033-f8396924c348?w=800&q=80",
+    ]
+  };
+
+  const genreKey =
+    slug.includes("idol") || slug.includes("superstar") || slug.includes("actor") || slug.includes("debut") ? "idol" :
+    slug.includes("mafia") || slug.includes("intelligence") || slug.includes("bodyguard") ? "action" :
+    slug.includes("surgeon") || slug.includes("doctor") ? "medical" :
+    slug.includes("reincarnated") || slug.includes("villainess") ? "fantasy" :
+    slug.includes("coffee") ? "cafe" : "corporate";
+
+  const list = imagesByGenre[genreKey];
+  return list[(epNum - 1) % list.length];
+}
+
 function buildBespokeDialogueArcs(config: any, ep: any, epNum: number) {
   const hero = config.heroId;
   const heroEn = config.heroEn;
@@ -1263,6 +1322,7 @@ function buildBespokeDialogueArcs(config: any, ep: any, epNum: number) {
   const dramaEn = config.titleEn;
 
   const ctx = getDramaDialogueContext(config.slug, epNum, hero, rival, title, synopsis, drama);
+  const coverImage = getEpisodeIllustration(config.slug, epNum, ctx.bgSlug);
 
   const dialogues = ctx.dialogues.map((d: any) => ({
     speakerEn: d.speaker === "Protagonist" ? "Protagonist" : heroEn,
@@ -1304,6 +1364,7 @@ function buildBespokeDialogueArcs(config: any, ep: any, epNum: number) {
     titleId: title,
     synopsis: synopsisEn,
     synopsisId: synopsis,
+    coverImage,
     bgSlug: ctx.bgSlug,
     bgMusic: ctx.bgMusic,
     dialogues,

@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { Play, Lock, CheckCircle2, Coins, RotateCcw } from "lucide-react";
+import { Play, Lock, CheckCircle2, Coins, RotateCcw, Image as ImageIcon } from "lucide-react";
 import { useI18n } from "@/lib/i18n/context";
 
 interface EpisodeItem {
@@ -14,6 +14,7 @@ interface EpisodeItem {
   synopsisId?: string | null;
   unlockType: string;
   coinPrice: number;
+  coverImage?: string | null;
   isUnlocked?: boolean;
   isCompleted?: boolean;
 }
@@ -54,33 +55,44 @@ export const EpisodeList: React.FC<EpisodeListProps> = ({
         return (
           <div
             key={ep.id}
-            className={`group relative flex items-center justify-between p-4 rounded-2xl border transition-all ${
+            className={`group relative flex items-center justify-between p-3 sm:p-4 rounded-2xl border transition-all overflow-hidden ${
               isAccessible
-                ? "bg-zinc-900/80 hover:bg-zinc-850 border-white/10 hover:border-white/20"
+                ? "bg-zinc-900/85 hover:bg-zinc-850 border-white/10 hover:border-rose-500/30 shadow-md"
                 : "bg-zinc-950/60 border-white/5 opacity-80"
             }`}
           >
-            {/* Left Episode Info */}
-            <div className="flex items-center gap-4 flex-1">
-              <div
-                className={`w-11 h-11 rounded-2xl flex items-center justify-center font-black text-sm flex-shrink-0 ${
-                  ep.isCompleted
-                    ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
-                    : isAccessible
-                    ? "bg-rose-500/20 text-rose-300 border border-rose-500/30"
-                    : "bg-zinc-800 text-zinc-500 border border-white/5"
-                }`}
-              >
-                {ep.isCompleted ? (
-                  <CheckCircle2 className="w-5 h-5" />
+            {/* Left Episode Info with Illustration Thumbnail */}
+            <div className="flex items-center gap-3.5 flex-1 min-w-0">
+              {/* Illustration Thumbnail */}
+              <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-zinc-800 flex-shrink-0 border border-white/10 group-hover:border-rose-500/40 transition">
+                {ep.coverImage ? (
+                  <img
+                    src={ep.coverImage}
+                    alt={displayTitle}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
                 ) : (
-                  <span>{ep.number}</span>
+                  <div className="w-full h-full bg-gradient-to-br from-rose-950/60 to-zinc-900 flex items-center justify-center">
+                    <ImageIcon className="w-6 h-6 text-zinc-600" />
+                  </div>
+                )}
+
+                {/* Badge Number Overlay */}
+                <div className="absolute top-1 left-1 px-1.5 py-0.5 rounded-md bg-black/75 backdrop-blur-sm text-[10px] font-black text-white border border-white/10">
+                  {ep.number}
+                </div>
+
+                {ep.isCompleted && (
+                  <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px] flex items-center justify-center">
+                    <CheckCircle2 className="w-6 h-6 text-emerald-400 drop-shadow" />
+                  </div>
                 )}
               </div>
 
-              <div className="flex flex-col">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs uppercase font-bold text-zinc-500">
+              {/* Text Info */}
+              <div className="flex flex-col min-w-0 pr-2">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-[11px] uppercase font-bold text-zinc-400">
                     {t("episodeNumber", { num: ep.number })}
                   </span>
                   {isFree && (
@@ -90,12 +102,12 @@ export const EpisodeList: React.FC<EpisodeListProps> = ({
                   )}
                 </div>
 
-                <h4 className="text-sm md:text-base font-bold text-white group-hover:text-rose-400 transition-colors">
+                <h4 className="text-sm sm:text-base font-bold text-white group-hover:text-rose-400 transition-colors truncate">
                   {displayTitle}
                 </h4>
 
                 {displaySynopsis && (
-                  <p className="text-xs text-zinc-400 line-clamp-1 mt-0.5">
+                  <p className="text-xs text-zinc-400 line-clamp-2 mt-0.5 leading-relaxed">
                     {displaySynopsis}
                   </p>
                 )}
@@ -103,16 +115,16 @@ export const EpisodeList: React.FC<EpisodeListProps> = ({
             </div>
 
             {/* Right Action Button */}
-            <div className="flex items-center gap-2 flex-shrink-0 ml-3">
+            <div className="flex items-center gap-2 flex-shrink-0 ml-2">
               {isAccessible ? (
                 <Link
                   href={`/story/${storySlug}/episode/${ep.number}`}
-                  className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 font-bold text-white text-xs flex items-center gap-1.5 shadow-md shadow-rose-950/40 transition"
+                  className="px-3.5 sm:px-4 py-2 rounded-xl bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400 font-bold text-white text-xs flex items-center gap-1.5 shadow-md shadow-rose-950/40 transition hover:scale-105 active:scale-95"
                 >
                   {ep.isCompleted ? (
                     <>
                       <RotateCcw className="w-3.5 h-3.5" />
-                      <span>{t("replayStory")}</span>
+                      <span className="hidden sm:inline">{t("replayStory")}</span>
                     </>
                   ) : (
                     <>
@@ -124,7 +136,7 @@ export const EpisodeList: React.FC<EpisodeListProps> = ({
               ) : (
                 <Link
                   href={`/story/${storySlug}/episode/${ep.number}`}
-                  className="px-3.5 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 font-bold text-amber-300 text-xs flex items-center gap-1.5 transition"
+                  className="px-3 sm:px-3.5 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 font-bold text-amber-300 text-xs flex items-center gap-1.5 transition hover:scale-105"
                 >
                   <Coins className="w-3.5 h-3.5" />
                   <span>

@@ -139,6 +139,7 @@ async function seedSingleDrama(sDef: any, sIdx: number, total: number, genreMap:
         titleId: ep.titleId,
         synopsis: ep.synopsis,
         synopsisId: ep.synopsisId,
+        coverImage: ep.coverImage,
         unlockType,
         coinPrice,
       },
@@ -149,6 +150,7 @@ async function seedSingleDrama(sDef: any, sIdx: number, total: number, genreMap:
         titleId: ep.titleId,
         synopsis: ep.synopsis,
         synopsisId: ep.synopsisId,
+        coverImage: ep.coverImage,
         unlockType,
         coinPrice,
         diamondPrice: 0,
@@ -172,6 +174,7 @@ async function seedSingleDrama(sDef: any, sIdx: number, total: number, genreMap:
         type: "SCENE_CHANGE",
         config: {
           backgroundSlug: ep.bgSlug,
+          backgroundUrl: ep.coverImage,
           musicTrack: ep.bgMusic,
           transition: "fade",
         },
