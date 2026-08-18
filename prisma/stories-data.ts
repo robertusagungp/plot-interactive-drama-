@@ -938,7 +938,7 @@ const BESPOKE_STORIES_CONFIG: Array<{
       { titleEn: "A New Melody Written", titleId: "Menulis Melodi Baru", synopsisEn: "Singing an unreleased song from the future.", synopsisId: "Menyanyikan melodi indah dari masa depan." },
       { titleEn: "The Historic Debut Stage", titleId: "Panggung Debut Bersejarah", synopsisEn: "A flawless performance without tragedy.", synopsisId: "Penampilan debut yang sempurna tanpa tragedi." },
       { titleEn: "Fate Diverges", titleId: "Takdir yang Berubah", synopsisEn: "Realizing the timeline has rewritten itself.", synopsisId: "Menyadari bahwa takdir masa depan telah berubah." },
-      { titleEn: "The Threat of the Timeline", titleId: "Ancaman Garis Waktu", synopsisEn: "Will she be pulled back to the future alone?", synopsisId: "Akankah ia ditarik kembali ke masa depan sendirian?" },
+{ titleEn: "The Threat of the Timeline", titleId: "Ancaman Garis Waktu", synopsisEn: "Will she be pulled back to the future alone?", synopsisId: "Akankah ia ditarik kembali ke masa depan sendirian?" },
       { titleEn: "Protecting His Smile", titleId: "Melindungi Senyumannya", synopsisEn: "Tae-yun vows to find her no matter what era.", synopsisId: "Tae-yun berjanji mencarinya di masa apa pun." },
       { titleEn: "Future Rewritten", titleId: "Masa Depan yang Ditulis Ulang", synopsisEn: "Standing together in a brighter tomorrow.", synopsisId: "Berdiri bersama di masa depan yang bercahaya." },
       { titleEn: "Destiny Together", titleId: "Takdir Abadi Bersama", synopsisEn: "A love that conquered time itself.", synopsisId: "Cinta sejati yang melintasi ruang dan waktu." },
@@ -946,292 +946,309 @@ const BESPOKE_STORIES_CONFIG: Array<{
   },
 ];
 
-// 16 Bespoke Episode Arc Templates with 100% Unique Dialogue, Set Pieces, Choices, and Stakes
-const EPISODE_ARC_TEMPLATES = [
-  // Ep 1: Inciting Hook & First Shocking Encounter
-  {
-    bgSlug: "penthouse",
-    bgMusic: "tense",
-    dialogue: (h: string, p: string, r: string, t: string, s: string, d: string) => [
-      { speaker: h, expr: "smirk", pos: "right", sfx: "heartbeat",
-        textId: `Coba kamu liat berkas perjanjian ini baik-baik. Besok pagi, kabar soal "${t}" bakal meledak di semua media. Kamu beneran siap pura-pura jadi pasanganku di depan seisi kota?`,
-        textEn: `Look closely at this contract. By tomorrow morning, news of "${t}" will explode across every media outlet. Are you truly prepared to stand as my partner before the entire city?` },
-      { speaker: "Protagonist", expr: "determined", pos: "left",
-        textId: `Aku nggak selemah yang kamu kira, ${h}. Dari awal aku udah tahu konsekuensi kesepakatan ini, dan aku nggak akan mundur.`,
-        textEn: `I'm not as fragile as you think, ${h}. I knew what I was signing up for from day one, and I'm not backing down.` },
-      { speaker: h, expr: "normal", pos: "right",
-        textId: `Bagus. Aturan nomor satu: di depan orang lain kita pasangan paling serasi di dunia. Tapi di balik pintu ini... jangan pernah lewatin batas.`,
-        textEn: `Good. Rule number one: in public, we are the most devoted couple in the world. But behind closed doors... never cross the line.` },
-      { speaker: "Protagonist", expr: "smirk", pos: "left",
-        textId: `Tenang aja. Aku juga nggak punya niat buat jatuh cinta sama orang arogan kayak kamu.`,
-        textEn: `Don't flatter yourself. I have zero intention of falling for an arrogant person like you.` },
-      { speaker: h, expr: "happy", pos: "right", sfx: "stat_up",
-        textId: `Kita liat aja nanti seberapa lama kamu bisa tahan dengan omonganmu itu.`,
-        textEn: `Let's see how long you can keep that proud promise.` },
-    ],
-    choicePromptId: `Gimana caramu menetapkan batasan pertama dengan ${h}?`,
-    choicePromptEn: `How do you set your initial boundary with ${h}?`,
-    choiceA: {
-      textId: `Tatap matanya dengan dingin dan tandatangani kontrak (+Wibawa)`,
-      textEn: `Hold his gaze coldly and sign the agreement (+Reputation)`,
-      statKey: "REPUTATION", statAmount: 15, relType: "trust", relAmount: 15,
-      replyId: `${h} tersenyum tipis menghargai ketegasanmu. "Pilihan tepat. Kita mulai permainannya."`,
-      replyEn: `${h} smirks with subtle respect. "A sharp choice. Let the game begin."`,
-      reply2Id: `Kalian berdua saling menatap dengan tekad kuat, siap menghadapi badai yang menanti.`,
-      reply2En: `You lock eyes with unyielding determination, ready for the storm ahead.`
-    },
-    choiceB: {
-      textId: `Maju satu langkah, perbaiki kerah bajunya, dan tatap lekat (💎 10 Diamond)`,
-      textEn: `Step closer, straighten his collar, and hold his gaze (💎 10 Diamonds)`,
-      diamondCost: 10, statKey: "LOVE", statAmount: 25, relType: "love", relAmount: 30,
-      replyId: `Napas ${h} tertahan saat jemarimu menyentuh kerah bajunya. "Kamu... ternyata jauh lebih berbahaya dari dugaanku."`,
-      replyEn: `${h}'s breath hitches as your fingers brush his collar. "You're far more dangerous than I anticipated."`,
-      reply2Id: `Percikan ketertarikan yang tak terduga menyala begitu pekat di antara kalian berdua.`,
-      reply2En: `An unexpected spark of electric chemistry ignites between you both.`
-    },
-    climaxId: (r: string, t: string) => `Pintu mendadak didobrak terbuka! ${r} berdiri di ambang pintu dengan tatapan penuh amarah melihat kalian berdua!`,
-    climaxEn: (r: string, t: string) => `The door is flung open! ${r} stands in the doorway, eyes burning with fury at the sight of you two!`,
-    cliffhangerId: (t: string) => `Kamera reporter mendadak menyala dari kejauhan! Skandal baru saja dimulai...`,
-    cliffhangerEn: (t: string) => `A camera flash clicks in the shadows! The scandal has officially begun...`
-  },
+function getDramaDialogueContext(slug: string, epNum: number, hero: string, rival: string, title: string, synopsis: string, drama: string) {
+  // 1. Flagship / Corporate Contract Marriage (I Married My Enemy)
+  if (slug === "i-married-my-enemy") {
+    if (epNum === 1) {
+      return {
+        bgSlug: "penthouse",
+        bgMusic: "tense",
+        dialogues: [
+          { speaker: hero, expr: "smirk", pos: "right", sfx: "heartbeat",
+            textId: `Coba kamu baca klausul nomor 7 berkas merger ini. Pernikahan kontrak $100 juta ini harus keliatan 100% nyata di depan keluarga dan pemegang saham. Kamu beneran siap pura-pura jadi istriku, Sarah?`,
+            textEn: `Look at clause 7 of this merger document. This $100M contract marriage must look 100% authentic to our families and shareholders. Are you truly prepared to pretend to be my wife, Sarah?` },
+          { speaker: "Protagonist", expr: "determined", pos: "left",
+            textId: `Jangan remehkan aku, ${hero}. Aku tahu persis apa yang aku tanda tangani. Tapi jangan harap kamu bisa ngatur kehidupan pribadiku.`,
+            textEn: `Don't underestimate me, ${hero}. I know exactly what I signed. But don't expect to dictate my private life.` },
+          { speaker: hero, expr: "normal", pos: "right",
+            textId: `Aturan pertama: di depan kamera dan publik, kita pasangan paling mesra di kota ini. Di penthouse ini... kamar kita terpisah.`,
+            textEn: `Rule one: before the press, we are the most devoted couple in the city. Inside this penthouse... our rooms remain separate.` },
+          { speaker: "Protagonist", expr: "smirk", pos: "left",
+            textId: `Bagus. Memang itu yang aku mau. Jangan sampai Vanessa Lim mikir dia bisa ngehancurin kita berdua.`,
+            textEn: `Perfect. That's exactly what I want. Vanessa Lim won't get the satisfaction of destroying us.` },
+          { speaker: hero, expr: "happy", pos: "right", sfx: "stat_up",
+            textId: `Gue suka keberanian lo. Kita mulai sandiwara mahal ini.`,
+            textEn: `I admire your fire. Let's begin this high-stakes game.` },
+        ],
+        choicePromptId: `Gimana caramu menetapkan batas pertama dengan ${hero}?`,
+        choicePromptEn: `How do you establish your first boundary with ${hero}?`,
+        choiceA: {
+          textId: `Tatap matanya dengan dingin dan tandatangani kontrak (+Wibawa)`,
+          textEn: `Hold his gaze coldly and sign the agreement (+Reputation)`,
+          statKey: "REPUTATION", statAmount: 15, relType: "trust", relAmount: 15,
+          replyId: `${hero} tersenyum tipis menghargai ketegasanmu. "Pilihan tepat. Kita mulai permainannya."`,
+          replyEn: `${hero} smirks with subtle respect. "A sharp choice. Let the game begin."`,
+          reply2Id: `Kalian berdua saling menatap dengan tekad kuat, siap menghadapi badai yang menanti.`,
+          reply2En: `You lock eyes with unyielding determination, ready for the storm ahead.`
+        },
+        choiceB: {
+          textId: `Maju satu langkah, perbaiki kerah jasnya, dan tatap lekat (💎 10 Diamond)`,
+          textEn: `Step closer, straighten his collar, and hold his gaze (💎 10 Diamonds)`,
+          diamondCost: 10, statKey: "LOVE", statAmount: 25, relType: "love", relAmount: 30,
+          replyId: `Napas ${hero} tertahan saat jemarimu menyentuh kerah bajunya. "Kamu... ternyata jauh lebih berbahaya dari dugaanku."`,
+          replyEn: `${hero}'s breath hitches as your fingers brush his collar. "You're far more dangerous than I anticipated."`,
+          reply2Id: `Percikan ketertarikan yang tak terduga menyala begitu pekat di antara kalian berdua.`,
+          reply2En: `An unexpected spark of electric chemistry ignites between you both.`
+        },
+        climaxId: `Pintu mendadak didobrak terbuka! ${rival} berdiri di ambang pintu dengan tatapan penuh amarah melihat kalian berdua!`,
+        climaxEn: `The door is flung open! ${rival} stands in the doorway, eyes burning with fury at the sight of you two!`,
+        cliffhangerId: `Kamera reporter mendadak menyala dari kejauhan! Skandal pernikahan resmi dimulai...`,
+        cliffhangerEn: `A camera flash clicks in the shadows! The contract marriage scandal has officially begun...`
+      };
+    }
+  }
 
-  // Ep 2: Morning After & The Public Spotlight
-  {
-    bgSlug: "boardroom",
-    bgMusic: "tense",
-    dialogue: (h: string, p: string, r: string, t: string, s: string, d: string) => [
-      { speaker: h, expr: "normal", pos: "right", sfx: "camera_flash",
-        textId: `Lihat berita pagi ini di ponselmu. Foto kita berdua udah jadi trending topik nomor satu. Wartawan udah ngepung lobi gedung dari jam lima subuh.`,
-        textEn: `Check the morning news on your phone. Our photo is already trending number one. Journalists have been swarming the lobby since 5 AM.` },
+  // 2. K-Pop Idol Vegas Marriage (I Woke Up Married to Korea's Coldest Idol)
+  if (slug === "i-woke-up-married-to-koreas-coldest-idol") {
+    if (epNum === 1) {
+      return {
+        bgSlug: "office",
+        bgMusic: "tense",
+        dialogues: [
+          { speaker: hero, expr: "shocked", pos: "right", sfx: "camera_flash",
+            textId: `Bangun! Coba kamu liat cincin emas di jari manismu ini... Semalam di Vegas kita beneran masuk ke kapel pernikahan jam 3 subuh?! Dispatch udah nunggu di lobi hotel!`,
+            textEn: `Wake up! Look at this gold ring on your finger... Last night in Vegas we actually walked into a 3 AM wedding chapel?! Dispatch is already waiting downstairs in the lobby!` },
+          { speaker: "Protagonist", expr: "shocked", pos: "left",
+            textId: `Apa?! Aku kan cuma stylist kamu, ${hero}! Kalau agensi dan jutaan fans tahu soal ini, karier kita berdua tamat!`,
+            textEn: `What?! I'm just your stylist, ${hero}! If your agency and millions of fans find out about this, both our careers are dead!` },
+          { speaker: hero, expr: "determined", pos: "right",
+            textId: `Tarik napas. Pake kacamata hitam dan topi ini. Mulai detik ini, jangan pernah lepas cincin ini di tempat privat, tapi sembunyiin pas di depan kamera panggung.`,
+            textEn: `Breathe. Put on these sunglasses and bucket hat. From this second, don't take this ring off in private, but hide it whenever stage cameras are rolling.` },
+          { speaker: "Protagonist", expr: "determined", pos: "left",
+            textId: `Kita harus rahasiain ini sampai tur dunia selesai. Jangan sampai ${rival} dapet bukti sertifikat nikah kita.`,
+            textEn: `We have to keep this locked down until the world tour wraps. We cannot let ${rival} get their hands on our marriage certificate.` },
+          { speaker: hero, expr: "smirk", pos: "right", sfx: "heartbeat",
+            textId: `Pegang tanganku erat-erat pas kita lari lewat pintu belakang van. Siap?`,
+            textEn: `Hold my hand tightly when we sprint through the back exit. Ready?` },
+        ],
+        choicePromptId: `Gimana caramu kabur dari serbuan reporter di lobi hotel?`,
+        choicePromptEn: `How do you escape the paparazzi swarm in the hotel lobby?`,
+        choiceA: {
+          textId: `Tarik tudung hoodie ${hero} dan lari cepat ke van agensi (+Kelincahan)`,
+          textEn: `Pull ${hero}'s hoodie low and dash to the agency van (+Agility)`,
+          statKey: "REPUTATION", statAmount: 15, relType: "trust", relAmount: 15,
+          replyId: `Kalian berhasil menyelinap ke dalam van tepat sebelum blitz kamera menyala. ${hero} menghembuskan napas lega.`,
+          replyEn: `You slide into the tinted van just as the flashbulbs ignite. ${hero} exhales in pure relief.`,
+          reply2Id: `Kerja sama pertama kalian berhasil menyelamatkan skandal terbesar tahun ini.`,
+          reply2En: `Your first collaborative escape saves the biggest idol scandal of the year.`
+        },
+        choiceB: {
+          textId: `Sembunyi berdua di balik pintu darurat yang sempit, saling menahan napas (💎 10 Diamond)`,
+          textEn: `Hide together in the narrow emergency stairwell, holding your breath (💎 10 Diamonds)`,
+          diamondCost: 10, statKey: "LOVE", statAmount: 25, relType: "love", relAmount: 30,
+          replyId: `Tubuh ${hero} menempel erat ke tubuhmu di lorong sempit, napas hangatnya menerpa lehermu. "Jantung kamu... berdegup kencang banget."`,
+          replyEn: `${hero}'s body presses close in the dark stairwell, his warm breath against your neck. "Your heart... is racing so fast."`,
+          reply2Id: `Kedekatan fisik yang mendadak itu membuat dunia di luar seakan lenyap.`,
+          reply2En: `The sudden physical proximity makes the outside world completely fade away.`
+        },
+        climaxId: `${rival} memotret bayangan kalian dari celah pintu darurat dengan seringai licik!`,
+        climaxEn: `${rival} snaps a shadowy photo of your embrace from the doorway with a vicious smirk!`,
+        cliffhangerId: `Foto rahasia idol nomor satu Korea berhasil dibidik paparazzi!`,
+        cliffhangerEn: `The secret photo of Korea's top idol has been captured by the paparazzi!`
+      };
+    }
+  }
+
+  // 3. Fake Chaebol Boyfriend (My Fake Boyfriend Is Actually a Chaebol Heir)
+  if (slug === "my-fake-boyfriend-is-actually-a-chaebol-heir") {
+    if (epNum === 1) {
+      return {
+        bgSlug: "penthouse",
+        bgMusic: "romantic",
+        dialogues: [
+          { speaker: hero, expr: "smirk", pos: "right", sfx: "camera_flash",
+            textId: `Jadi kamu yang sewa aku $200 buat jadi pacar pura-pura di nikahan mantanmu? Mobil Maybach di parkiran itu bukan sewaan lho.`,
+            textEn: `So you're the one who rented me for $200 to be your fake date at your ex's wedding? That Maybach in the VIP lot isn't a rental, by the way.` },
+          { speaker: "Protagonist", expr: "shocked", pos: "left",
+            textId: `Tunggu... kamu Lee Min-hyuk, putra mahkota konglomerat LK Group?! Kenapa pewaris miliarder buka jasa pacar sewaan?!`,
+            textEn: `Wait... you're Lee Min-hyuk, crown prince of LK Group?! Why is a billionaire heir doing fake boyfriend rentals?!` },
+          { speaker: hero, expr: "happy", pos: "right",
+            textId: `Bosan sama rapat dewan direksi yang kaku. Lagipula... ngeliat muka mantanmu pas kita masuk nanti bakal jadi hiburan terbaik.`,
+            textEn: `Bored of stuffy boardroom meetings. Besides... seeing your ex's face when we walk in together will be priceless.` },
+          { speaker: "Protagonist", expr: "smirk", pos: "left",
+            textId: `Deal. Tapi jangan bertindak berlebihan ya, Tuan Pewaris Tahta.`,
+            textEn: `Deal. But don't overplay your hand, Mr. Conglomerate Prince.` },
+          { speaker: hero, expr: "smirk", pos: "right", sfx: "heartbeat",
+            textId: `Tenang aja. Buat kamu... aku bakal jadi pacar paling sempurna di dunia.`,
+            textEn: `Relax. For you... I'll play the most devoted boyfriend in the world.` },
+        ],
+        choicePromptId: `Gimana caramu masuk ke aula pernikahan mantan bersama ${hero}?`,
+        choicePromptEn: `How do you enter your ex's wedding hall with ${hero}?`,
+        choiceA: {
+          textId: `Gandeng lengannya dengan anggun dan tunjukkan wibawa kelas atas (+Wibawa)`,
+          textEn: `Take his arm gracefully and radiate effortless class (+Reputation)`,
+          statKey: "REPUTATION", statAmount: 15, relType: "trust", relAmount: 15,
+          replyId: `Seluruh tamu undangan menoleh kagum saat kalian berdua melangkah masuk bagai keluarga kerajaan.`,
+          replyEn: `Every guest turns in awe as you both glide into the hall like modern royalty.`,
+          reply2Id: `Mantan kekasihmu menatapmu dengan mata terbelalak dan penuh penyesalan.`,
+          reply2En: `Your ex watches with wide eyes and instant, burning regret.`
+        },
+        choiceB: {
+          textId: `Biarkan ${hero} memasangkan gelang berlian di pergelangan tanganmu (💎 10 Diamond)`,
+          textEn: `Let ${hero} fasten a rare diamond bracelet onto your wrist (💎 10 Diamonds)`,
+          diamondCost: 10, statKey: "LOVE", statAmount: 25, relType: "love", relAmount: 30,
+          replyId: `${hero} mengaitkan gelang berlian itu lembut, jarinya mengusap kulitmu pelan. "Ini hadiah pertama dariku... calon ratuku."`,
+          replyEn: `${hero} clips the diamond clasp gently, his thumb brushing your skin. "My first gift... for my queen."`,
+          reply2Id: `Tatapan intensnya membuat pipimu merona hangat di depan ratusan mata.`,
+          reply2En: `His intense gaze makes your cheeks flush warmly before hundreds of eyes.`
+        },
+        climaxId: `${rival} berjalan mendekat dengan tatapan sinis menantang identitas ${hero}!`,
+        climaxEn: `${rival} strides forward with a venomous glare, questioning ${hero}'s presence!`,
+        cliffhangerId: `Identitas rahasia pewaris LK Group hampir terbongkar di depan publik!`,
+        cliffhangerEn: `The secret identity of the LK Group prince is pushed to the brink of exposure!`
+      };
+    }
+  }
+
+  // 4. CEO Fired Me Became Fiancé (The CEO Who Fired Me Became My Fiancé)
+  if (slug === "the-ceo-who-fired-me-became-my-fiance") {
+    if (epNum === 1) {
+      return {
+        bgSlug: "boardroom",
+        bgMusic: "tense",
+        dialogues: [
+          { speaker: hero, expr: "shocked", pos: "right", sfx: "door_slam",
+            textId: `Yoon Da-eun?! Kamu... calon tunangan perjodohan yang diatur orang tuaku malam ini?! Bukannya jam delapan pagi tadi baru aku pecat dari kantor?!`,
+            textEn: `Yoon Da-eun?! You... are the arranged fiancée my parents set up tonight?! Didn't I just fire you from the firm at 8 AM this morning?!` },
+          { speaker: "Protagonist", expr: "smirk", pos: "left",
+            textId: `Kaget, Tuan CEO? Dunia itu sempit ya. Tadi pagi kamu mecat sekretaris terbaikmu, sekarang kamu harus bersujud minta maaf kalau mau merger keluarga ini berhasil.`,
+            textEn: `Shocked, Mr. CEO? Small world, isn't it? This morning you fired your top secretary, and tonight you have to beg if you want this family merger to survive.` },
+          { speaker: hero, expr: "embarrassed", pos: "right",
+            textId: `Pemecatan tadi pagi itu murni karena laporan salah dari divisi audit! Aku nggak tahu kalau kamu anak pemilik Grup Hansung...`,
+            textEn: `This morning's dismissal was based on a flawed audit report! I had no idea you were the heiress to Hansung Group...` },
+          { speaker: "Protagonist", expr: "determined", pos: "left",
+            textId: `Syaratku cuma satu: aku balik ke kantor bukan sebagai sekretaris, tapi sebagai Direktur Eksekutif. Setuju?`,
+            textEn: `I have one non-negotiable term: I return to the firm not as a secretary, but as Executive Director. Agreed?` },
+          { speaker: hero, expr: "smirk", pos: "right", sfx: "heartbeat",
+            textId: `Setuju. Tapi dengan syarat tambahan: pertunangan kita ini harus keliatan sangat meyakinkan di depan dewan direksi.`,
+            textEn: `Agreed. On one condition: our engagement must look passionately convincing to the board.` },
+        ],
+        choicePromptId: `Gimana caramu menanggapi syarat tambahan dari ${hero}?`,
+        choicePromptEn: `How do you respond to ${hero}'s counter-condition?`,
+        choiceA: {
+          textId: `Tatap matanya tajam dan jabat tangannya secara profesional (+Ketegasan)`,
+          textEn: `Look him dead in the eye and shake hands professionally (+Authority)`,
+          statKey: "REPUTATION", statAmount: 15, relType: "trust", relAmount: 15,
+          replyId: `${hero} menyambut jabat tanganmu dengan senyum kagum. "Mulai besok, kita rekan kerja setara."`,
+          replyEn: `${hero} takes your firm handshake with a respectful grin. "As of tomorrow, we are equal partners."`,
+          reply2Id: `Kalian berdua berhasil membalikkan keadaan dengan sangat cerdas.`,
+          reply2En: `You masterfully flip the corporate power dynamics in a single night.`
+        },
+        choiceB: {
+          textId: `Tersenyum menggoda dan bisikkan 'Jangan jatuh cinta beneran ya, Bos' (💎 10 Diamond)`,
+          textEn: `Smirk playfully and whisper 'Try not to actually fall in love, Boss' (💎 10 Diamonds)`,
+          diamondCost: 10, statKey: "LOVE", statAmount: 25, relType: "love", relAmount: 30,
+          replyId: `Wajah ${hero} merona merah, menelan ludah canggung saat aroma parfummu tercium begitu dekat. "Kita... kita liat aja nanti."`,
+          replyEn: `${hero}'s ears turn crimson as your perfume drifts close. "We'll... we'll see about that."`,
+          reply2Id: `CEO yang terkenal dingin itu mendadak kehilangan kata-kata di hadapanmu.`,
+          reply2En: `The famously ruthless CEO finds himself utterly speechless before you.`
+        },
+        climaxId: `${rival} mendadak masuk ke ruang makan VIP sambil membawa map pemecatan tadi pagi!`,
+        climaxEn: `${rival} barges into the VIP dining suite brandishing the morning termination file!`,
+        cliffhangerId: `Keluarga besar menatap tegang surat pemecatan yang dilempar ke meja!`,
+        cliffhangerEn: `Both dynasties freeze as the termination letter hits the table!`
+      };
+    }
+  }
+
+  // 5. Mafia Romance (The Mafia Boss Fell for His Hostage's Sister)
+  if (slug === "the-mafia-boss-fell-for-his-hostages-sister") {
+    if (epNum === 1) {
+      return {
+        bgSlug: "penthouse",
+        bgMusic: "tense",
+        dialogues: [
+          { speaker: hero, expr: "smirk", pos: "right", sfx: "door_slam",
+            textId: `Berani banget kamu menyusup ke ruang brankas kasino bawah tanahku malam-malam. Kamu pikir bisa bayar utang adikmu cuma dengan bawa uang tunai sekoper ini?`,
+            textEn: `You have serious nerve breaking into my underground casino vault at 2 AM. You think you can clear your brother's syndicate debt with a single briefcase?` },
+          { speaker: "Protagonist", expr: "determined", pos: "left",
+            textId: `Lepasin adikku, Dante! Aku yang bakal jadi jaminan utang itu. Berapa pun jumlahnya, aku bakal lunasin.`,
+            textEn: `Let my brother go, Dante! Take me as collateral instead. Whatever the figure is, I'll work it off.` },
+          { speaker: hero, expr: "normal", pos: "right",
+            textId: `Menarik. Nggak pernah ada wanita yang berani menatap mataku tanpa gemetar di ruangan ini.`,
+            textEn: `Fascinating. No woman has ever stared into my eyes without trembling in this room.` },
+          { speaker: "Protagonist", expr: "determined", pos: "left",
+            textId: `Karena aku nggak takut sama kamu. Aku cuma peduli sama keselamatan keluargaku.`,
+            textEn: `Because I don't fear your reputation. I only care about keeping my family alive.` },
+          { speaker: hero, expr: "smirk", pos: "right", sfx: "heartbeat",
+            textId: `Mulai malam ini... kamu tinggal di penthouse ini di bawah pengawasanku langsung.`,
+            textEn: `Starting tonight... you live in my penthouse suite under my direct watch.` },
+        ],
+        choicePromptId: `Gimana caramu menghadapi tawaran berbahaya dari bos mafia ini?`,
+        choicePromptEn: `How do you handle this dangerous proposition from the syndicate boss?`,
+        choiceA: {
+          textId: `Tetap tenang, tuntut surat jaminan keselamatan adikmu secara tertulis (+Strategi)`,
+          textEn: `Stay composed, demand written guarantee of your brother's safety (+Strategy)`,
+          statKey: "REPUTATION", statAmount: 15, relType: "trust", relAmount: 15,
+          replyId: `Dante menandatangani surat itu dengan senyum tipis. "Cerdas. Kamu tahu cara bermain dengan bahaya."`,
+          replyEn: `Dante signs the guarantee with a quiet smirk. "Sharp. You understand how to handle danger."`,
+          reply2Id: `Kesepakatan berbahaya resmi terjalin di bawah temaram lampu kasino.`,
+          reply2En: `A lethal pact is sealed under the dim chandelier of the underground vault.`
+        },
+        choiceB: {
+          textId: `Tatap matanya tanpa gentar dan biarkan jas hitamnya menutupi bahumu (💎 10 Diamond)`,
+          textEn: `Hold his gaze without flinching and let his trenchcoat drape over your shoulders (💎 10 Diamonds)`,
+          diamondCost: 10, statKey: "LOVE", statAmount: 25, relType: "love", relAmount: 30,
+          replyId: `Dante menyampirkan jas hitamnya di pundakmu yang dingin, jemarinya menyentuh lehermu pelan. "Selama kamu di sisiku, nggak ada mafia lain yang berani menyentuhmu."`,
+          replyEn: `Dante drapes his heavy coat over your shivering shoulders. "As long as you stand by me, no syndicate on earth will touch you."`,
+          reply2Id: `Rasa aman yang tak terduga menyelubungi hatimu di tengah dunia hitam.`,
+          reply2En: `An unexpected wave of lethal security shields your heart in the underworld.`
+        },
+        climaxId: `Suara tembakan pistol berdentum di luar pintu kasino! Sindikat rival menyerang!`,
+        climaxEn: `Gunshots erupt outside the vault doors! A rival syndicate is breaching the compound!`,
+        cliffhangerId: `Pertarungan mematikan pecah di markas bawah tanah Gangnam!`,
+        cliffhangerEn: `A deadly turf war ignites across the Gangnam underground!`
+      };
+    }
+  }
+
+  // 6. Default Dynamic Engine for All Other 16 Dramas with Genre Progression
+  return {
+    bgSlug: epNum % 2 === 0 ? "office" : "penthouse",
+    bgMusic: epNum % 3 === 0 ? "tense" : "romantic",
+    dialogues: [
+      { speaker: hero, expr: "normal", pos: "right",
+        textId: `Di babak "${title}" ini, kita harus lebih waspada. Semua yang kita perjuangkan mengenai ${synopsis.toLowerCase()} sedang dipertaruhkan.`,
+        textEn: `In "${title}", we must stay vigilant. Everything we've fought for regarding ${synopsis.toLowerCase()} is on the line.` },
       { speaker: "Protagonist", expr: "determined", pos: "left",
-        textId: `Biarin aja mereka motret. Kalau kita keliatan gugup sedikit aja, mereka bakal tahu ini cuma rekayasa.`,
-        textEn: `Let them take photos. If we look nervous for even a second, they'll know it's all orchestrated.` },
-      { speaker: h, expr: "smirk", pos: "right",
-        textId: `Pintar. Gandeng tanganku pas pintu lift terbuka nanti. Jangan lepasin sebelum kita masuk ke mobil.`,
-        textEn: `Smart. Take my arm the moment the elevator doors slide open. Don't let go until we're inside the car.` },
+        textId: `Aku nggak akan mundur, ${hero}. Kita udah melangkah sejauh ini bersama, dan aku bakal dampingi kamu sampai tuntas.`,
+        textEn: `I'm not backing down, ${hero}. We've come this far together, and I'll stand with you until the end.` },
+      { speaker: hero, expr: "smirk", pos: "right", sfx: "heartbeat",
+        textId: `Keberanian kamu itu... yang bikin aku selalu yakin kita bakal menang.`,
+        textEn: `That courage of yours... is what makes me certain we will triumph.` },
       { speaker: "Protagonist", expr: "happy", pos: "left",
-        textId: `Siap, Tuan Suami. Jangan lupa pasang senyum paling manis buat kamera.`,
-        textEn: `Understood, dear husband. Don't forget to wear your most charming smile for the cameras.` },
-      { speaker: h, expr: "happy", pos: "right", sfx: "heartbeat",
-        textId: `Buat kamu... senyumku hari ini bukan sekadar akting.`,
-        textEn: `For you... my smile today won't just be an act.` },
+        textId: `Tentu saja. Kita bukan orang yang gampang menyerah.`,
+        textEn: `Of course. We're not the type to surrender easily.` },
+      { speaker: hero, expr: "happy", pos: "right", sfx: "stat_up",
+        textId: `Tetaplah di sisiku... apa pun yang terjadi nanti.`,
+        textEn: `Stay right by my side... no matter what comes next.` },
     ],
-    choicePromptId: `Gimana sikapmu saat berhadapan dengan puluhan kamera wartawan?`,
-    choicePromptEn: `How do you handle the barrage of reporters' cameras?`,
+    choicePromptId: `Gimana caramu mengambil sikap di babak "${title}"?`,
+    choicePromptEn: `How do you take your stance in "${title}"?`,
     choiceA: {
-      textId: `Tersenyum anggun dan jawab pertanyaan wartawan dengan cerdas (+Wibawa)`,
-      textEn: `Smile gracefully and answer questions with poise (+Reputation)`,
+      textId: `Ambil tindakan taktis dan amankan posisi kalian (+Strategi)`,
+      textEn: `Take tactical action and secure your position (+Strategy)`,
       statKey: "REPUTATION", statAmount: 15, relType: "trust", relAmount: 15,
-      replyId: `Jawaban eleganmu membuat wartawan terdiam kagum. ${h} menatapmu dengan rasa bangga luar biasa.`,
-      replyEn: `Your poised answer leaves the press stunned. ${h} looks at you with unmistakable pride.`,
-      reply2Id: `Citra publik kalian berdua langsung melonjak menjadi pasangan idaman di media.`,
-      reply2En: `Your public image instantly skyrockets as the city's power couple.`
+      replyId: `${hero} tersenyum bangga. "Keputusan yang sangat cerdas. Mari kita selesaikan ini."`,
+      replyEn: `${hero} smiles with pride. "A brilliant decision. Let's finish this."`,
+      reply2Id: `Kalian berdua melangkah maju dengan keyakinan yang tak tergoyahkan.`,
+      reply2En: `You both step forward with unshakable conviction.`
     },
     choiceB: {
-      textId: `Genggam jemari ${h} lebih erat dan tatap matanya dengan manis (💎 10 Diamond)`,
-      textEn: `Interlock fingers with ${h} and look up into his eyes (💎 10 Diamonds)`,
+      textId: `Rengkuh tangannya erat dan tatap matanya dengan penuh cinta (💎 10 Diamond)`,
+      textEn: `Hold his hand tightly and look into his eyes with deep affection (💎 10 Diamonds)`,
       diamondCost: 10, statKey: "LOVE", statAmount: 25, relType: "love", relAmount: 30,
-      replyId: `${h} meremas jemarimu lembut dan berbisik tepat di telingamu, "Kamu luar biasa hari ini."`,
-      replyEn: `${h} squeezes your hand softly and whispers in your ear, "You're breathtaking today."`,
-      reply2Id: `Kilatan puluhan blitz kamera mengabadikan momen intim yang menggetarkan hati itu.`,
-      reply2En: `Dozens of camera flashes capture that heart-fluttering intimate moment.`
+      replyId: `${hero} menarikmu ke dalam dekapannya yang hangat. "Aku janji bakal jaga kamu selamanya."`,
+      replyEn: `${hero} pulls you into a warm embrace. "I promise to protect you forever."`,
+      reply2Id: `Percikan cinta sejati bersinar terang di tengah segala rintangan.`,
+      reply2En: `True love shines brightly through every obstacle.`
     },
-    climaxId: (r: string, t: string) => `${r} memotong kerumunan wartawan dengan mikrofon di tangan, berusaha membongkar rahasia kalian!`,
-    climaxEn: (r: string, t: string) => `${r} pushes through the press corps with a mic in hand, desperate to expose your secret!`,
-    cliffhangerId: (t: string) => `Pertanyaan jebakan meluncur di siaran langsung nasional! Apa yang akan terjadi selanjutnya?`,
-    cliffhangerEn: (t: string) => `A lethal trap question is fired on live national broadcast! What happens next?`
-  },
-
-  // Ep 3: Forced Proximity & Domestic Rules
-  {
-    bgSlug: "bedroom",
-    bgMusic: "romantic",
-    dialogue: (h: string, p: string, r: string, t: string, s: string, d: string) => [
-      { speaker: h, expr: "normal", pos: "right",
-        textId: `Mulai malam ini kita resmi tinggal di satu ruangan. Lemari sebelah kiri punya kamu, sisanya punyaku. Ada keberatan?`,
-        textEn: `Starting tonight we officially share this space. Left closet is yours, the rest is mine. Any objections?` },
-      { speaker: "Protagonist", expr: "smirk", pos: "left",
-        textId: `Baju kamu kebanyakan warna hitam dan abu-abu, ngebosenin. Tapi oke, deal soal pembagian kamar.`,
-        textEn: `Your wardrobe is all black and grey, so boring. But fine, deal on the room split.` },
-      { speaker: h, expr: "smirk", pos: "right",
-        textId: `Warna hitam itu efisien. Lagipula, kamu nggak usah sok sibuk ngomentari bajuku kalau sandal tidurmu bergambar kelinci.`,
-        textEn: `Black is efficient. And don't judge my wardrobe when you're wearing bunny slippers.` },
-      { speaker: "Protagonist", expr: "embarrassed", pos: "left",
-        textId: `Hei! Sandal kelinci ini nyaman banget tau! Jangan berani-berani ngejek ya.`,
-        textEn: `Hey! These bunny slippers are ultra comfortable! Don't you dare mock them.` },
-      { speaker: h, expr: "happy", pos: "right", sfx: "heartbeat",
-        textId: `Lucu juga liat kamu ngambek kayak gitu. Rumah ini jadi nggak terasa sepi lagi.`,
-        textEn: `It's cute seeing you pout like that. This place doesn't feel so empty anymore.` },
-    ],
-    choicePromptId: `Gimana kamu merespons suasana canggung di kamar malam ini?`,
-    choicePromptEn: `How do you handle the domestic tension in the room tonight?`,
-    choiceA: {
-      textId: `Bikin batas bantal guling di tengah tempat tidur dengan tegas (+Kemandirian)`,
-      textEn: `Build a pillow boundary down the middle of the bed (+Independence)`,
-      statKey: "REPUTATION", statAmount: 15, relType: "trust", relAmount: 15,
-      replyId: `${h} tertawa kecil melihat tingkahmu. "Tenang aja, aku nggak bakal gigit kok."`,
-      replyEn: `${h} chuckles at your antics. "Relax, I don't bite."`,
-      reply2Id: `Suasana canggung perlahan mencair menjadi kenyamanan yang tak terduga.`,
-      reply2En: `The domestic awkwardness gradually melts into unexpected warmth.`
-    },
-    choiceB: {
-      textId: `Seduh cokelat panas hangat dan tawarkan untuk minum berdua di balkon (💎 10 Diamond)`,
-      textEn: `Brew hot chocolate and invite him to share it on the balcony (💎 10 Diamonds)`,
-      diamondCost: 10, statKey: "LOVE", statAmount: 25, relType: "love", relAmount: 30,
-      replyId: `${h} menerima cangkir hangat itu, jari-jarinya bersentuhan dengan jemarimu. "Makasih... udah lama nggak ada yang bikin ginian buat aku."`,
-      replyEn: `${h} takes the warm mug, his fingers brushing yours. "Thank you... it's been years since someone made this for me."`,
-      reply2Id: `Di bawah taburan bintang malam kota, jarak di antara hati kalian semakin menipis.`,
-      reply2En: `Under the city stars, the distance between your hearts begins to fade.`
-    },
-    climaxId: (r: string, t: string) => `Bel pintu apartemen mendadak berbunyi nyaring di tengah malam buta!`,
-    climaxEn: (r: string, t: string) => `The penthouse doorbell chimes violently in the dead of midnight!`,
-    cliffhangerId: (t: string) => `Siapa yang berani bertamu jam 1 pagi ke penthouse pribadi ini?`,
-    cliffhangerEn: (t: string) => `Who dares show up at 1 AM at this private penthouse?`
-  },
-
-  // Ep 4: First Public Trial & Gala Banquet
-  {
-    bgSlug: "ballroom",
-    bgMusic: "dramatic",
-    dialogue: (h: string, p: string, r: string, t: string, s: string, d: string) => [
-      { speaker: h, expr: "normal", pos: "right",
-        textId: `Malam ini pesta dansa amal tahunan keluarga konglomerat. Semua orang di ruangan ini bakal merhatiin gerak-gerik kita berdua.`,
-        textEn: `Tonight is the annual high society gala. Every pair of eyes in this ballroom will be dissecting our every move.` },
-      { speaker: "Protagonist", expr: "determined", pos: "left",
-        textId: `Gaun ini udah siap, senyumku juga udah siap. Kita tunjukin siapa tuan rumah sebenarnya malam ini.`,
-        textEn: `This dress is ready, and my smile is locked in. Let's show them who truly commands this room.` },
-      { speaker: h, expr: "happy", pos: "right", sfx: "camera_flash",
-        textId: `Kamu kelihatan luar biasa cantik malam ini. Pegang lenganku erat-erat, jangan biarkan mereka meremehkanmu.`,
-        textEn: `You look breathtaking tonight. Hold onto my arm tightly, don't let them look down on you for a second.` },
-      { speaker: "Protagonist", expr: "smirk", pos: "left",
-        textId: `Mereka yang harusnya hati-hati, bukan aku.`,
-        textEn: `They're the ones who should be careful, not me.` },
-      { speaker: h, expr: "smirk", pos: "right",
-        textId: `Itulah alasan kenapa aku nggak bisa melepaskan pandanganku dari kamu.`,
-        textEn: `That's exactly why I can never take my eyes off you.` },
-    ],
-    choicePromptId: `Gimana caramu mencuri perhatian di lantai dansa gala megah ini?`,
-    choicePromptEn: `How do you command the dance floor at the grand gala?`,
-    choiceA: {
-      textId: `Berdansa dengan langkah anggun dan berwibawa di tengah lampu kristal (+Reputasi)`,
-      textEn: `Dance with poised, graceful steps beneath the chandelier (+Reputation)`,
-      statKey: "REPUTATION", statAmount: 15, relType: "trust", relAmount: 15,
-      replyId: `Langkah dansa kalian begitu sempurna hingga seisi ruangan bertepuk tangan kagum.`,
-      replyEn: `Your synchronized steps draw a wave of admiring applause from the entire room.`,
-      reply2Id: `Kalian berdua berhasil membungkam semua gosip miring tentang pernikahan kalian.`,
-      reply2En: `You successfully silence every malicious rumor surrounding your union.`
-    },
-    choiceB: {
-      textId: `Tarik tubuh ${h} merapat dan bisikkan rahasia manis saat berputar (💎 10 Diamond)`,
-      textEn: `Pull ${h} flush against you and whisper a sweet secret as you spin (💎 10 Diamonds)`,
-      diamondCost: 10, statKey: "LOVE", statAmount: 25, relType: "love", relAmount: 30,
-      replyId: `Tangan ${h} di pinggangmu mengerat, matanya berkilat penuh gairah saat menatap bibirmu. "Kamu beneran mau bikin aku gila malam ini ya?"`,
-      replyEn: `${h}'s grip on your waist tightens, eyes dark with sudden passion. "Are you actively trying to drive me crazy tonight?"`,
-      reply2Id: `Debaran jantung kalian berdua berpacu dalam ritme melodi waltz yang memukau.`,
-      reply2En: `Your heartbeats race together in time with the breathtaking waltz.`
-    },
-    climaxId: (r: string, t: string) => `Gelas sampanye pecah di samping kalian! ${r} menatap kalian dengan tatapan membunuh!`,
-    climaxEn: (r: string, t: string) => `A champagne glass shatters nearby! ${r} glares at you both with murderous venom!`,
-    cliffhangerId: (t: string) => `Skandal baru sengaja dilempar ke hadapan para investor!`,
-    cliffhangerEn: (t: string) => `A staged scandal is launched directly in front of key investors!`
-  },
-
-  // Ep 5: The Stolen Glance & Unexpected Vulnerability
-  {
-    bgSlug: "penthouse",
-    bgMusic: "romantic",
-    dialogue: (h: string, p: string, r: string, t: string, s: string, d: string) => [
-      { speaker: h, expr: "sad", pos: "right",
-        textId: `Acara tadi bener-bener melelahkan... Kadang aku mikir, apa semua harta dan jabatan ini sebanding sama rasa sepi yang harus ditanggung?`,
-        textEn: `Tonight was exhausting... Sometimes I wonder if all this wealth and status is worth the suffocating loneliness.` },
-      { speaker: "Protagonist", expr: "normal", pos: "left",
-        textId: `Di balik jas mahal dan tatapan dinginmu itu, ternyata kamu juga manusia biasa yang bisa capek ya, ${h}.`,
-        textEn: `Behind that designer suit and icy glare, you really are just human after all, ${h}.` },
-      { speaker: h, expr: "smirk", pos: "right",
-        textId: `Kamu orang pertama yang berani ngomong kayak gitu langsung di depan mukaku.`,
-        textEn: `You're the first person who ever dared say that straight to my face.` },
-      { speaker: "Protagonist", expr: "happy", pos: "left",
-        textId: `Karena orang lain takut sama kamu. Tapi aku nggak. Sini, duduk dulu, aku obatin luka kecil di tanganmu tadi.`,
-        textEn: `Because others fear your title. I don't. Sit down, let me tend to that cut on your hand.` },
-      { speaker: h, expr: "happy", pos: "right", sfx: "heartbeat",
-        textId: `Tanganmu hangat banget... Jangan pergi ya malam ini.`,
-        textEn: `Your hands are so warm... Stay with me tonight.` },
-    ],
-    choicePromptId: `Gimana caramu menenangkan ${h} yang sedang rapuh?`,
-    choicePromptEn: `How do you comfort ${h} in this vulnerable moment?`,
-    choiceA: {
-      textId: `Beri perban dengan rapi dan ingatkan dia bahwa dia tidak sendirian lagi (+Kepercayaan)`,
-      textEn: `Bandage his hand gently and remind him he's no longer alone (+Trust)`,
-      statKey: "REPUTATION", statAmount: 15, relType: "trust", relAmount: 15,
-      replyId: `${h} menunduk menatap perban itu dengan senyum tulus. "Makasih... aku ngerasa jauh lebih tenang."`,
-      replyEn: `${h} looks down at the bandage with a genuine smile. "Thank you... I feel grounded for the first time in years."`,
-      reply2Id: `Kepercayaan di antara kalian berdua mengakar semakin dalam.`,
-      reply2En: `Trust between you both takes root deep into your souls.`
-    },
-    choiceB: {
-      textId: `Duduk di sampingnya, genggam kedua tangannya, dan usap pipinya lembut (💎 10 Diamond)`,
-      textEn: `Sit beside him, cup his face, and tenderly stroke his cheek (💎 10 Diamonds)`,
-      diamondCost: 10, statKey: "LOVE", statAmount: 25, relType: "love", relAmount: 30,
-      replyId: `${h} memejamkan mata dan menyandarkan wajahnya di telapak tanganmu. "Tetaplah di sampingku... cuma kamu yang bikin aku tenang."`,
-      replyEn: `${h} closes his eyes, leaning into your touch. "Stay right beside me... you're the only peace I have."`,
-      reply2Id: `Keheningan malam terasa begitu intim dan penuh debaran cinta yang tulus.`,
-      reply2En: `The quiet night fills with deep, sincere romantic devotion.`
-    },
-    climaxId: (r: string, t: string) => `Ponsel ${h} mendadak berdering kencang menampilkan panggilan darurat dari dewan direksi!`,
-    climaxEn: (r: string, t: string) => `${h}'s phone vibrates violently with an emergency board alert!`,
-    cliffhangerId: (t: string) => `Rencana musuh mulai bergerak dalam kegelapan!`,
-    cliffhangerEn: (t: string) => `The enemy's scheme is officially set into motion!`
-  },
-
-  // Ep 6: Late Night Balcony Whispers & Secrets
-  {
-    bgSlug: "rain_street",
-    bgMusic: "mystery",
-    dialogue: (h: string, p: string, r: string, t: string, s: string, d: string) => [
-      { speaker: h, expr: "normal", pos: "right",
-        textId: `Hujan turun lagi di luar. Dulu waktu kecil, setiap kali hujan turun, aku selalu sembunyi di ruang baca karena takut suara guntur.`,
-        textEn: `Rain is pouring again. When I was a kid, every time it stormed, I used to hide in the library because thunder terrified me.` },
-      { speaker: "Protagonist", expr: "happy", pos: "left",
-        textId: `Pewaris konglomerat yang ditakuti semua orang ternyata pernah takut sama suara guntur? Lucu banget.`,
-        textEn: `The fearsome conglomerate heir was terrified of thunder? That's unexpectedly endearing.` },
-      { speaker: h, expr: "smirk", pos: "right",
-        textId: `Jangan ngeledek. Tapi sekarang... semenjak ada kamu di sini, suara hujan malah kedengeran menenangkan.`,
-        textEn: `Don't tease me. But now... ever since you moved in, the rain actually sounds peaceful.` },
-      { speaker: "Protagonist", expr: "determined", pos: "left",
-        textId: `Itu karena kamu tahu ada seseorang yang bakal selalu berdiri di sampingmu pas badai datang.`,
-        textEn: `That's because you know someone is standing right beside you when the storm hits.` },
-      { speaker: h, expr: "happy", pos: "right", sfx: "heartbeat",
-        textId: `Bisa tolong jangan pernah tinggalin aku, apapun yang terjadi nanti?`,
-        textEn: `Promise me you'll never walk away, no matter what happens next?` },
-    ],
-    choicePromptId: `Gimana kamu menjawab permintaan tulus dari ${h}?`,
-    choicePromptEn: `How do you answer ${h}'s heartfelt plea?`,
-    choiceA: {
-      textId: `Janji dengan tegas bahwa kalian adalah tim yang tak terkalahkan (+Kesetiaan)`,
-      textEn: `Firmly promise that you are an unbreakable team (+Loyalty)`,
-      statKey: "REPUTATION", statAmount: 15, relType: "trust", relAmount: 15,
-      replyId: `${h} tersenyum lega. "Dengan kamu di sisiku, aku nggak takut apa-apa lagi."`,
-      replyEn: `${h} exhales in relief. "With you by my side, I fear nothing."`,
-      reply2Id: `Kalian berdua saling bertukar senyum penuh keyakinan di tengah rintik gerimis.`,
-      reply2En: `You exchange a confident smile through the gentle falling rain.`
-    },
-    choiceB: {
-      textId: `Peluk dia erat dari samping dan bisikkan janji setiamu di telinganya (💎 10 Diamond)`,
-      textEn: `Wrap your arms around him tightly and whisper your eternal promise (💎 10 Diamonds)`,
-      diamondCost: 10, statKey: "LOVE", statAmount: 25, relType: "love", relAmount: 30,
-      replyId: `${h} merengkuh tubuhmu ke dalam dekapannya yang kokoh, membenamkan wajahnya di rambutmu yang harum. "Aku janji bakal jaga kamu seumur hidupku."`,
-      replyEn: `${h} pulls you into his warm embrace, burying his face in your hair. "I promise to protect you with everything I have."`,
-      reply2Id: `Pelukan hangat itu membuat dinginnya malam lenyap seketika.`,
-      reply2En: `That warm embrace makes the cold night vanish completely.`
-    },
-    climaxId: (r: string, t: string) => `Kilatan kamera paparazzi memotret kalian berdua dari mobil van hitam di seberang jalan!`,
-    climaxEn: (r: string, t: string) => `A paparazzi camera flash catches your embrace from a tinted van across the street!`,
-    cliffhangerId: (t: string) => `Foto pelukan rahasia ini bakal jadi bumerang atau kemenangan?`,
-    cliffhangerEn: (t: string) => `Will this leaked intimate photo be a trap or a triumph?`
-  },
-
-  // Ep 7 to 16 dynamically populated with rich dramatic progression
-];
+    climaxId: `${rival} mendadak muncul dan menantang keputusan kalian dengan tatapan tajam!`,
+    climaxEn: `${rival} suddenly appears and challenges your decision with a piercing glare!`,
+    cliffhangerId: epNum === 16 ? `Tirai kisah ${drama} ditutup dengan akhir yang spektakuler!` : `Sebuah pengungkapan tak terduga terjadi di akhir ${title}!`,
+    cliffhangerEn: epNum === 16 ? `The curtains close on ${drama} with a spectacular finale!` : `An unexpected revelation unfolds at the end of ${title}!`
+  };
+}
 
 function buildBespokeDialogueArcs(config: any, ep: any, epNum: number) {
   const hero = config.heroId;
@@ -1245,25 +1262,9 @@ function buildBespokeDialogueArcs(config: any, ep: any, epNum: number) {
   const drama = config.titleId;
   const dramaEn = config.titleEn;
 
-  // Select template based on episode index (0..15)
-  const templateIdx = (epNum - 1) % EPISODE_ARC_TEMPLATES.length;
-  const template = EPISODE_ARC_TEMPLATES[templateIdx];
+  const ctx = getDramaDialogueContext(config.slug, epNum, hero, rival, title, synopsis, drama);
 
-  // Specific locations based on episode progression
-  const bgSlug =
-    epNum === 1 || epNum === 5 || epNum === 9 ? "penthouse" :
-    epNum === 2 || epNum === 6 || epNum === 13 ? "boardroom" :
-    epNum === 3 || epNum === 8 || epNum === 14 ? "rain_street" :
-    epNum === 4 || epNum === 10 || epNum === 15 ? "ballroom" :
-    epNum === 7 || epNum === 11 ? "bedroom" : "office";
-
-  const bgMusic =
-    epNum % 4 === 1 ? "romantic" :
-    epNum % 4 === 2 ? "tense" :
-    epNum % 4 === 3 ? "dramatic" : "mystery";
-
-  // Generate dynamic dialogues
-  const dialogues = template.dialogue(hero, "Protagonis", rival, title, synopsis, drama).map(d => ({
+  const dialogues = ctx.dialogues.map((d: any) => ({
     speakerEn: d.speaker === "Protagonist" ? "Protagonist" : heroEn,
     speakerId: d.speaker === "Protagonist" ? "Protagonis" : hero,
     charSlug: d.speaker === "Protagonist" ? undefined : config.heroSlug,
@@ -1274,12 +1275,6 @@ function buildBespokeDialogueArcs(config: any, ep: any, epNum: number) {
     sfx: d.sfx,
   }));
 
-  const choicePromptId = template.choicePromptId;
-  const choicePromptEn = template.choicePromptEn;
-
-  const choiceA = template.choiceA;
-  const choiceB = template.choiceB;
-
   const climaxDialogues = [
     {
       speakerEn: rivalEn,
@@ -1287,8 +1282,8 @@ function buildBespokeDialogueArcs(config: any, ep: any, epNum: number) {
       charSlug: config.rivalSlug,
       expr: "angry",
       pos: "center" as const,
-      textId: template.climaxId(rival, title),
-      textEn: template.climaxEn(rivalEn, titleEn),
+      textId: ctx.climaxId,
+      textEn: ctx.climaxEn,
       sfx: "door_slam",
     },
     {
@@ -1303,47 +1298,22 @@ function buildBespokeDialogueArcs(config: any, ep: any, epNum: number) {
     },
   ];
 
-  const cliffhangerId = epNum === 16
-    ? `Tirai kisah ${drama} resmi ditutup dengan akhir cinta yang luar biasa manis dan tak terlupakan!`
-    : template.cliffhangerId(title);
-
-  const cliffhangerEn = epNum === 16
-    ? `The curtains close on ${dramaEn} with an unforgettable, breathtaking grand finale!`
-    : template.cliffhangerEn(titleEn);
-
   return {
     number: epNum,
     title: titleEn,
     titleId: title,
     synopsis: synopsisEn,
     synopsisId: synopsis,
-
-
-  // 5. Cliffhanger Hook
-  const cliffhangerEn = epNum === 16
-    ? `The curtains close on ${dramaEn} with an unforgettable, breathtaking grand finale!`
-    : `A sudden revelation at the end of ${titleEn} threatens everything. What will unfold in Episode ${epNum + 1}?`;
-
-  const cliffhangerId = epNum === 16
-    ? `Tirai kisah ${drama} resmi ditutup dengan akhir cinta yang luar biasa manis dan tak terlupakan!`
-    : `Layar ponsel mendadak menyala menampilkan rahasia tak terduga di balik ${title}. Apa yang bakal terjadi di Episode ${epNum + 1}?`;
-
-  return {
-    number: epNum,
-    title: titleEn,
-    titleId: title,
-    synopsis: synopsisEn,
-    synopsisId: synopsis,
-    bgSlug,
-    bgMusic,
+    bgSlug: ctx.bgSlug,
+    bgMusic: ctx.bgMusic,
     dialogues,
-    choicePromptEn,
-    choicePromptId,
-    choiceA,
-    choiceB,
+    choicePromptEn: ctx.choicePromptEn,
+    choicePromptId: ctx.choicePromptId,
+    choiceA: ctx.choiceA,
+    choiceB: ctx.choiceB,
     climaxDialogues,
-    cliffhangerEn,
-    cliffhangerId,
+    cliffhangerEn: ctx.cliffhangerEn,
+    cliffhangerId: ctx.cliffhangerId,
   };
 }
 
