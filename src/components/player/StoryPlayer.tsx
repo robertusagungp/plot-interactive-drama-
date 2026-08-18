@@ -779,14 +779,35 @@ export const StoryPlayer: React.FC<StoryPlayerProps> = ({
           onClick={advanceNode}
           className="absolute inset-0 w-full h-full cursor-pointer"
         >
-          <SceneView
-            backgroundSlug={backgroundSlug}
-            backgroundUrl={backgroundUrl}
-            backgroundEffect={backgroundEffect}
-            activeCharacters={activeCharacters}
-            overlayEffect={overlayEffect}
-            activeSpeakerSlug={currentNode?.type === "DIALOGUE" ? currentNode?.config?.characterSlug : undefined}
-          />
+          {(() => {
+            const displayCharacters: Record<string, PlayerCharacterState> = { ...activeCharacters };
+            if (currentNode?.type === "DIALOGUE" && currentNode.config) {
+              const charSlug = currentNode.config.characterSlug || "lead";
+              displayCharacters[charSlug] = {
+                slug: charSlug,
+                name: (locale === "id" && currentNode.config.speakerId) ? currentNode.config.speakerId : (currentNode.config.speaker || charSlug),
+                expression: currentNode.config.expression || "normal",
+                position: currentNode.config.position || "center",
+                isVisible: true,
+                animation: "pulse",
+                activity: currentNode.config.activity,
+                activityTextId: currentNode.config.activityTextId,
+                activityTextEn: currentNode.config.activityTextEn,
+                reactionFx: currentNode.config.reactionFx || "none",
+              };
+            }
+
+            return (
+              <SceneView
+                backgroundSlug={backgroundSlug}
+                backgroundUrl={backgroundUrl}
+                backgroundEffect={backgroundEffect}
+                activeCharacters={displayCharacters}
+                overlayEffect={overlayEffect}
+                activeSpeakerSlug={currentNode?.type === "DIALOGUE" ? (currentNode?.config?.characterSlug || "lead") : undefined}
+              />
+            );
+          })()}
         </div>
 
         {/* Interactive Bottom Layer: Dialogue / Narration / Choices */}

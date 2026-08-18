@@ -26,87 +26,59 @@ export const SceneView: React.FC<SceneViewProps> = ({
 }) => {
   const bgData = SCENE_BACKGROUNDS[backgroundSlug] || SCENE_BACKGROUNDS.penthouse;
 
-  // Split characters by position
-  const leftChars = Object.values(activeCharacters).filter(
-    (c) => c.isVisible && c.position === "left"
-  );
-  const centerChars = Object.values(activeCharacters).filter(
-    (c) => c.isVisible && c.position === "center"
-  );
-  const rightChars = Object.values(activeCharacters).filter(
-    (c) => c.isVisible && c.position === "right"
-  );
+  // Split characters by position or fallback
+  const charList = Object.values(activeCharacters).filter((c) => c.isVisible);
+  const leftChars = charList.filter((c) => c.position === "left");
+  const centerChars = charList.filter((c) => c.position === "center");
+  const rightChars = charList.filter((c) => c.position === "right");
+
+  const effectiveBgImage = backgroundUrl || bgData.imageUrl;
 
   return (
-    <div className="relative w-full h-full overflow-hidden bg-slate-950 select-none">
-      {/* Background Layer with Motion & Ambient Atmosphere */}
+    <div className="relative w-full h-full overflow-hidden select-none bg-slate-950 flex flex-col justify-end">
+      {/* 1. Cinematic Background Layer with Ken Burns Motion */}
       <motion.div
-        key={backgroundSlug + (backgroundUrl || bgData.imageUrl || "")}
-        variants={screenOverlayVariants}
-        animate={getMotionVariant(backgroundEffect)}
-        className="absolute inset-0 w-full h-full bg-cover bg-center pointer-events-none"
+        key={backgroundSlug + (backgroundUrl || "")}
+        variants={getMotionVariant(backgroundEffect)}
+        initial="initial"
+        animate="animate"
+        className="absolute inset-0 w-full h-full overflow-hidden"
       >
-        {/* Real HD Illustration Backdrop with Ken Burns Camera Motion */}
-        {(backgroundUrl || bgData.imageUrl) && (
+        {effectiveBgImage ? (
           <motion.div
+            initial={{ scale: 1 }}
+            animate={{ scale: [1, 1.05, 1] }}
+            transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
             className="absolute inset-0 w-full h-full bg-cover bg-center"
             style={{
-              backgroundImage: `url(${backgroundUrl || bgData.imageUrl})`,
+              backgroundImage: `url(${effectiveBgImage})`,
+              backgroundPosition: "center 30%",
             }}
-            initial={{ scale: 1 }}
-            animate={{ scale: [1, 1.04, 1] }}
-            transition={{
-              duration: 18,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
+          />
+        ) : (
+          <div
+            className="absolute inset-0 w-full h-full"
+            style={{ background: bgData.background }}
           />
         )}
 
-        {/* Ambient Gradient Foundation */}
-        <div className={`w-full h-full bg-gradient-to-b ${bgData.gradient} relative overflow-hidden ${backgroundUrl || bgData.imageUrl ? "opacity-35" : "opacity-100"}`}>
-          {/* Ambient Cityline SVG */}
-          {bgData.svgElements === "cityline" && (
-            <div className="absolute inset-x-0 bottom-0 h-2/3 opacity-35 pointer-events-none">
-              <svg viewBox="0 0 1000 500" className="w-full h-full object-cover fill-current text-sky-950">
-                <rect x="50" y="180" width="90" height="320" rx="4" fill="#0B132B" />
-                <rect x="160" y="80" width="120" height="420" rx="4" fill="#0D1B2A" />
-                <rect x="300" y="240" width="80" height="260" rx="4" fill="#1C2541" />
-                <rect x="400" y="120" width="140" height="380" rx="4" fill="#0B132B" />
-                <rect x="560" y="60" width="100" height="440" rx="4" fill="#0D1B2A" />
-                <rect x="680" y="190" width="110" height="310" rx="4" fill="#1C2541" />
-                <rect x="810" y="140" width="130" height="360" rx="4" fill="#0B132B" />
-                {/* Glowing office windows */}
-                {Array.from({ length: 45 }).map((_, i) => (
-                  <circle
-                    key={i}
-                    cx={100 + ((i * 22) % 780)}
-                    cy={150 + ((i * 37) % 280)}
-                    r="2"
-                    fill={i % 3 === 0 ? "#38BDF8" : "#FBBF24"}
-                    opacity={0.8}
-                  />
-                ))}
-              </svg>
-            </div>
-          )}
-
-          {/* Ambient Rain Animation */}
+        {/* Ambient Scene Overlays */}
+        <div className="absolute inset-0 pointer-events-none">
+          {/* Rain Streaks */}
           {bgData.svgElements === "rain" && (
-            <div className="absolute inset-0 opacity-40 pointer-events-none overflow-hidden">
-              <div className="absolute inset-0 bg-[radial-gradient(#38bdf8_1.5px,transparent_1.5px)] [background-size:20px_36px] animate-pulse" />
-              {Array.from({ length: 14 }).map((_, i) => (
+            <div className="absolute inset-0 overflow-hidden opacity-40 pointer-events-none">
+              {Array.from({ length: 16 }).map((_, i) => (
                 <motion.div
                   key={i}
                   className="absolute w-[1.5px] bg-gradient-to-b from-transparent via-cyan-400 to-transparent"
                   style={{
                     height: `${40 + (i % 5) * 20}px`,
-                    left: `${(i * 8) % 100}%`,
+                    left: `${(i * 7) % 100}%`,
                     top: "-40px",
                   }}
                   animate={{
                     y: ["0vh", "110vh"],
-                    opacity: [0, 0.8, 0],
+                    opacity: [0, 0.85, 0],
                   }}
                   transition={{
                     repeat: Infinity,
@@ -136,24 +108,24 @@ export const SceneView: React.FC<SceneViewProps> = ({
           )}
         </div>
 
-        {/* Floating Sparkle Ambient Particles for all scenes */}
+        {/* Floating Sparkle Ambient Particles */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           {Array.from({ length: 8 }).map((_, i) => (
             <motion.div
               key={i}
-              className="absolute w-1.5 h-1.5 rounded-full bg-rose-400/60 shadow-[0_0_10px_#f43f5e]"
+              className="absolute w-1.5 h-1.5 rounded-full bg-rose-400/70 shadow-[0_0_10px_#f43f5e]"
               style={{
-                left: `${15 + (i * 12) % 75}%`,
-                top: `${20 + (i * 15) % 65}%`,
+                left: `${12 + (i * 13) % 78}%`,
+                top: `${15 + (i * 14) % 65}%`,
               }}
               animate={{
-                y: [0, -25, 0],
-                opacity: [0.2, 0.85, 0.2],
-                scale: [0.8, 1.3, 0.8],
+                y: [0, -30, 0],
+                opacity: [0.2, 0.9, 0.2],
+                scale: [0.8, 1.4, 0.8],
               }}
               transition={{
                 repeat: Infinity,
-                duration: 3 + (i % 3),
+                duration: 3.2 + (i % 3),
                 delay: (i * 0.4) % 2,
                 ease: "easeInOut",
               }}
@@ -168,7 +140,7 @@ export const SceneView: React.FC<SceneViewProps> = ({
         />
 
         {/* Cinematic Vignette */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/30 to-black/60 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/25 to-black/50 pointer-events-none" />
       </motion.div>
 
       {/* Screen Effects Overlay (Flash / Shake) */}
@@ -184,91 +156,130 @@ export const SceneView: React.FC<SceneViewProps> = ({
         )}
       </AnimatePresence>
 
-      {/* Character Layering Stage */}
-      <div className="relative w-full h-full z-10 flex items-end justify-between px-2 pb-24 md:pb-28 max-w-lg mx-auto pointer-events-none">
-        {/* LEFT POSITION */}
-        <div className="relative w-1/3 h-full flex items-end justify-center">
-          <AnimatePresence mode="popLayout">
-            {leftChars.map((char) => (
-              <motion.div
-                key={char.slug}
-                variants={characterMotionVariants}
-                initial="enter-left"
-                animate={getMotionVariant(char.animation)}
-                exit="exit-left"
-                className="absolute bottom-0 w-full h-full flex items-end justify-center"
-              >
-                <CharacterSprite
-                  slug={char.slug}
-                  name={char.name}
-                  expression={char.expression}
-                  position="left"
-                  customAvatarUrl={char.avatarUrl}
-                  isSpeaking={char.slug === activeSpeakerSlug}
-                  activity={char.activity}
-                  activityText={char.activityTextId || char.activityTextEn}
-                  reactionFx={char.reactionFx}
-                />
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </div>
+      {/* 2. Character Layering Stage (Prominent & High Viewport) */}
+      <div className="relative w-full h-[72vh] sm:h-[78vh] z-10 flex items-end justify-center px-1 pb-32 sm:pb-36 max-w-lg mx-auto pointer-events-none">
+        {/* Single Character Mode (Centered & Dominant) */}
+        {charList.length === 1 ? (
+          <div className="relative w-4/5 sm:w-3/4 max-w-[340px] h-full flex items-end justify-center z-20">
+            <AnimatePresence mode="popLayout">
+              {charList.map((char) => (
+                <motion.div
+                  key={char.slug}
+                  variants={characterMotionVariants}
+                  initial="initial"
+                  animate={getMotionVariant(char.animation)}
+                  exit="fade-out"
+                  className="absolute bottom-0 w-full h-full flex items-end justify-center"
+                >
+                  <CharacterSprite
+                    slug={char.slug}
+                    name={char.name}
+                    expression={char.expression}
+                    position={char.position}
+                    customAvatarUrl={char.avatarUrl}
+                    isSpeaking={char.slug === activeSpeakerSlug || true}
+                    activity={char.activity}
+                    activityText={char.activityTextId || char.activityTextEn}
+                    reactionFx={char.reactionFx}
+                  />
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+        ) : (
+          /* Multi-Character Dynamic Stage */
+          <div className="relative w-full h-full flex items-end justify-between px-1">
+            {/* LEFT POSITION */}
+            <div className="relative w-1/2 h-full flex items-end justify-center">
+              <AnimatePresence mode="popLayout">
+                {leftChars.map((char) => (
+                  <motion.div
+                    key={char.slug}
+                    variants={characterMotionVariants}
+                    initial="enter-left"
+                    animate={getMotionVariant(char.animation)}
+                    exit="exit-left"
+                    className={`absolute bottom-0 w-full h-full flex items-end justify-center transition-all duration-300 ${
+                      char.slug === activeSpeakerSlug ? "z-20 scale-105" : "z-10 brightness-85 scale-95"
+                    }`}
+                  >
+                    <CharacterSprite
+                      slug={char.slug}
+                      name={char.name}
+                      expression={char.expression}
+                      position="left"
+                      customAvatarUrl={char.avatarUrl}
+                      isSpeaking={char.slug === activeSpeakerSlug}
+                      activity={char.activity}
+                      activityText={char.activityTextId || char.activityTextEn}
+                      reactionFx={char.reactionFx}
+                    />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
 
-        {/* CENTER POSITION */}
-        <div className="relative w-1/2 h-full flex items-end justify-center z-20">
-          <AnimatePresence mode="popLayout">
-            {centerChars.map((char) => (
-              <motion.div
-                key={char.slug}
-                variants={characterMotionVariants}
-                initial="initial"
-                animate={getMotionVariant(char.animation)}
-                exit="fade-out"
-                className="absolute bottom-0 w-full h-full flex items-end justify-center"
-              >
-                <CharacterSprite
-                  slug={char.slug}
-                  name={char.name}
-                  expression={char.expression}
-                  position="center"
-                  customAvatarUrl={char.avatarUrl}
-                  isSpeaking={char.slug === activeSpeakerSlug}
-                  activity={char.activity}
-                  activityText={char.activityTextId || char.activityTextEn}
-                  reactionFx={char.reactionFx}
-                />
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </div>
+            {/* CENTER POSITION */}
+            {centerChars.length > 0 && (
+              <div className="relative w-1/2 h-full flex items-end justify-center z-20">
+                <AnimatePresence mode="popLayout">
+                  {centerChars.map((char) => (
+                    <motion.div
+                      key={char.slug}
+                      variants={characterMotionVariants}
+                      initial="initial"
+                      animate={getMotionVariant(char.animation)}
+                      exit="fade-out"
+                      className="absolute bottom-0 w-full h-full flex items-end justify-center"
+                    >
+                      <CharacterSprite
+                        slug={char.slug}
+                        name={char.name}
+                        expression={char.expression}
+                        position="center"
+                        customAvatarUrl={char.avatarUrl}
+                        isSpeaking={char.slug === activeSpeakerSlug}
+                        activity={char.activity}
+                        activityText={char.activityTextId || char.activityTextEn}
+                        reactionFx={char.reactionFx}
+                      />
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </div>
+            )}
 
-        {/* RIGHT POSITION */}
-        <div className="relative w-1/3 h-full flex items-end justify-center">
-          <AnimatePresence mode="popLayout">
-            {rightChars.map((char) => (
-              <motion.div
-                key={char.slug}
-                variants={characterMotionVariants}
-                initial="enter-right"
-                animate={getMotionVariant(char.animation)}
-                exit="exit-right"
-                className="absolute bottom-0 w-full h-full flex items-end justify-center"
-              >
-                <CharacterSprite
-                  slug={char.slug}
-                  name={char.name}
-                  expression={char.expression}
-                  position="right"
-                  customAvatarUrl={char.avatarUrl}
-                  isSpeaking={char.slug === activeSpeakerSlug}
-                  activity={char.activity}
-                  activityText={char.activityTextId || char.activityTextEn}
-                  reactionFx={char.reactionFx}
-                />
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </div>
+            {/* RIGHT POSITION */}
+            <div className="relative w-1/2 h-full flex items-end justify-center">
+              <AnimatePresence mode="popLayout">
+                {rightChars.map((char) => (
+                  <motion.div
+                    key={char.slug}
+                    variants={characterMotionVariants}
+                    initial="enter-right"
+                    animate={getMotionVariant(char.animation)}
+                    exit="exit-right"
+                    className={`absolute bottom-0 w-full h-full flex items-end justify-center transition-all duration-300 ${
+                      char.slug === activeSpeakerSlug ? "z-20 scale-105" : "z-10 brightness-85 scale-95"
+                    }`}
+                  >
+                    <CharacterSprite
+                      slug={char.slug}
+                      name={char.name}
+                      expression={char.expression}
+                      position="right"
+                      customAvatarUrl={char.avatarUrl}
+                      isSpeaking={char.slug === activeSpeakerSlug}
+                      activity={char.activity}
+                      activityText={char.activityTextId || char.activityTextEn}
+                      reactionFx={char.reactionFx}
+                    />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
